@@ -5,9 +5,9 @@ Central configuration — SmartRecruit Platform.
 from __future__ import annotations
 import os
 import secrets
-from dotenv import load_dotenv
 
-load_dotenv()
+# Don't load .env in Railway; use environment variables directly
+# load_dotenv()
 
 # ---------------------------------------------------------------------------
 # PostgreSQL
@@ -54,3 +54,4 @@ DEFAULT_PAGE_SIZE: int = 12
 SERVER_HOST: str = os.getenv("SERVER_HOST", "127.0.0.1")
 SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8000"))
 RELOAD: bool     = os.getenv("RELOAD", "true").lower() == "true"
+
