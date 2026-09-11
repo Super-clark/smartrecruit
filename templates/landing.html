@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block title %}SmartRecruit — Smart Talent Matchmaking{% endblock %}
+
+{% block head %}
+<style>
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse-ring { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
+  .float-1{animation:float 6s ease-in-out infinite}
+  .float-2{animation:float 8s ease-in-out infinite .5s}
+  .float-3{animation:float 7s ease-in-out infinite 1s}
+  .fade-up{animation:fadeUp .7s ease both}
+  .fade-up-2{animation:fadeUp .7s ease .15s both}
+  .fade-up-3{animation:fadeUp .7s ease .3s both}
+  .fade-up-4{animation:fadeUp .7s ease .45s both}
+  .pulse-ring::before{content:'';position:absolute;inset:-4px;border-radius:9999px;border:2px solid rgba(20,184,166,.5);animation:pulse-ring 2s ease-out infinite}
+  .grad-text{background:linear-gradient(135deg,#2dd4bf 0%,#14b8a6 40%,#5eead4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero-grid{background-image:linear-gradient(rgba(20,184,166,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(20,184,166,.04) 1px,transparent 1px);background-size:48px 48px}
+  .stat-card{background:linear-gradient(135deg,#0d1a1a,#0a1515);border:1px solid #1a3333;position:relative;overflow:hidden}
+  .stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:9999px;background:radial-gradient(circle,rgba(20,184,166,.15),transparent 70%)}
+  .feature-card{background:#0d1a1a;border:1px solid #1a3333;transition:border-color .2s,transform .2s,box-shadow .2s}
+  .feature-card:hover{border-color:rgba(20,184,166,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(20,184,166,.1)}
+  .job-card{background:#0d1a1a;border:1px solid #1a3333;transition:border-color .2s,box-shadow .2s}
+  .job-card:hover{border-color:rgba(20,184,166,.4);box-shadow:0 6px 20px rgba(20,184,166,.08)}
+  .role-card{border:1px solid #1a3333;transition:border-color .25s,box-shadow .25s}
+  .role-card:hover{border-color:rgba(20,184,166,.5);box-shadow:0 0 0 1px rgba(20,184,166,.15),0 12px 40px rgba(20,184,166,.1)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="relative overflow-hidden hero-grid" style="min-height:92vh;display:flex;align-items:center">
+  <div style="position:absolute;top:-120px;left:-120px;width:500px;height:500px;border-radius:9999px;background:radial-gradient(circle,rgba(20,184,166,.08),transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-80px;right:-80px;width:400px;height:400px;border-radius:9999px;background:radial-gradient(circle,rgba(13,148,136,.06),transparent 70%);pointer-events:none"></div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 fade-up" style="background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.25)">
+          <span class="relative w-2 h-2 pulse-ring"><span class="block w-2 h-2 rounded-full" style="background:#14b8a6"></span></span>
+          <span class="text-xs font-semibold" style="color:#2dd4bf" data-i18n="smart_matching">Smart Candidate Matching</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-tight mb-6 fade-up-2" style="color:var(--text-white)">
+          <span data-i18n="hero_line1">Stop searching.</span><br/>
+          <span data-i18n="hero_line2_prefix">Start </span><span class="grad-text" data-i18n="hero_line2_word">connecting.</span>
+        </h1>
+
+        <p class="text-base sm:text-lg mb-8 leading-relaxed fade-up-3" style="color:#94a3b8">
+          <span data-i18n="hero_desc">SmartRecruit uses smart profile matching to connect candidates and employers based on real skills and experience — not keyword luck. Describe what you need, and our engine finds who fits.</span>
+        </p>
+
+        <div class="flex flex-wrap gap-3 mb-10 fade-up-4">
+          <a href="/auth/register?role=EMPLOYER" class="btn-primary px-7 py-3 text-base rounded-xl" data-i18n="hire_talent">Hire Talent →</a>
+          <a href="/auth/register?role=CANDIDATE" class="px-7 py-3 text-base rounded-xl font-semibold transition-all" style="background:rgba(20,184,166,.1);color:#2dd4bf;border:1px solid rgba(20,184,166,.3)" onmouseover="this.style.background='rgba(20,184,166,.18)'" onmouseout="this.style.background='rgba(20,184,166,.1)'" data-i18n="find_job">Find a Job →</a>
+          <a href="/jobs" class="btn-secondary px-7 py-3 text-base rounded-xl" data-i18n="browse_jobs">Browse Jobs</a>
+        </div>
+
+        <div class="flex items-center gap-4 fade-up-4" style="color:#475569;font-size:.8rem">
+          <div class="flex -space-x-2">
+            {% for col in ['#0f766e','#115e59','#0d9488','#134e4a'] %}
+            <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-white font-bold text-xs" style="background:{{ col }};border-color:var(--bg-base)">{{ loop.index }}</div>
+            {% endfor %}
+          </div>
+          <span data-i18n="social_proof">{{ total_candidates }}+ candidates &amp; {{ total_employers }}+ companies already on the platform</span>
+        </div>
+      </div>
+
+      <!-- Floating stat cards -->
+      <div class="relative hidden lg:block" style="height:420px">
+        <div class="float-1 absolute top-0 right-8 w-52 rounded-2xl p-5 shadow-2xl" style="background:#0d1a1a;border:1px solid rgba(20,184,166,.3)">
+          <p class="text-xs font-semibold mb-1" style="color:#2dd4bf" data-i18n="smart_search_label">🔍 Smart Search</p>
+          <p class="text-2xl font-black" style="color:var(--text-white)">{{ total_candidates }}</p>
+          <p class="text-xs" style="color:#64748b" data-i18n="indexed_candidates">indexed candidates</p>
+          <div class="mt-3 h-1.5 rounded-full" style="background:#143030">
+            <div class="h-1.5 rounded-full" style="background:linear-gradient(90deg,#14b8a6,#2dd4bf);width:72%"></div>
+          </div>
+        </div>
+
+        <div class="float-2 absolute top-32 left-0 w-56 rounded-2xl p-5 shadow-xl" style="background:#0d1a1a;border:1px solid #1a3333">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-base" style="background:rgba(20,184,166,.15)">💼</span>
+            <div>
+              <p class="text-xs font-semibold" style="color:var(--text-white)" data-i18n="open_positions">Open Positions</p>
+              <p class="text-xs" style="color:#64748b" data-i18n="actively_hiring">actively hiring</p>
+            </div>
+          </div>
+          <p class="text-3xl font-black" style="color:#14b8a6">{{ total_jobs }}</p>
+        </div>
+
+        <div class="float-3 absolute bottom-4 right-4 w-48 rounded-2xl p-4 shadow-xl" style="background:#0d1a1a;border:1px solid rgba(20,184,166,.25)">
+          <p class="text-xs font-semibold mb-2" style="color:#94a3b8" data-i18n="latest_match_label">Latest match</p>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white" style="background:#0f766e">A</div>
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-white truncate">Alice Chen</p>
+              <p class="text-xs truncate" style="color:#64748b">Python Engineer</p>
+            </div>
+          </div>
+          <div class="mt-2.5 flex items-center gap-1.5">
+            <div class="flex-1 h-1 rounded-full" style="background:#143030">
+              <div class="h-1 rounded-full" style="background:#14b8a6;width:94%"></div>
+            </div>
+            <span class="text-xs font-bold" style="color:#2dd4bf">94%</span>
+          </div>
+          <p class="text-xs mt-0.5" style="color:#475569" data-i18n="match_score_label">match score</p>
+        </div>
+
+        <div class="absolute top-14 right-0 w-44 rounded-xl px-3 py-2.5 shadow-lg" style="background:#0a1515;border:1px solid #1a3333">
+          <p class="text-xs font-semibold" style="color:var(--text-white)" data-i18n="new_outreach_notif">🔔 New outreach</p>
+          <p class="text-xs mt-0.5" style="color:#64748b" data-i18n="techcorp_messaged">TechCorp messaged you</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section style="background:#0a1515;border-top:1px solid #1a3333;border-bottom:1px solid #1a3333">
+  <div class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-3 gap-6">
+    <div class="text-center">
+      <p class="text-3xl font-black" style="color:#14b8a6">{{ total_candidates }}</p>
+      <p class="text-sm mt-1" style="color:#64748b" data-i18n="active_candidates">👤 Active Candidates</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-black" style="color:#14b8a6">{{ total_jobs }}</p>
+      <p class="text-sm mt-1" style="color:#64748b" data-i18n="open_positions_stat">💼 Open Positions</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-black" style="color:#14b8a6">{{ total_employers }}</p>
+      <p class="text-sm mt-1" style="color:#64748b" data-i18n="companies_hiring">🏢 Companies Hiring</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="max-w-5xl mx-auto px-4 py-20">
+  <div class="text-center mb-12">
+    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#14b8a6" data-i18n="simple_process">Simple process</p>
+    <h2 class="text-3xl font-extrabold" style="color:var(--text-white)" data-i18n="how_it_works">How SmartRecruit works</h2>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
+    <div class="feature-card rounded-2xl p-6 relative">
+      <span class="absolute top-4 right-4 text-3xl font-black" style="color:rgba(20,184,166,.12)">01</span>
+      <p class="text-3xl mb-3">🧑‍💼</p>
+      <h3 class="font-bold text-base mb-2" style="color:var(--text-white)" data-i18n="step1_title">Create your profile</h3>
+      <p class="text-sm leading-relaxed" style="color:#64748b" data-i18n="step1_desc">Candidates add skills, CV and experience. Employers set up company info, culture and open roles.</p>
+    </div>
+    <div class="feature-card rounded-2xl p-6 relative">
+      <span class="absolute top-4 right-4 text-3xl font-black" style="color:rgba(20,184,166,.12)">02</span>
+      <p class="text-3xl mb-3">🔗</p>
+      <h3 class="font-bold text-base mb-2" style="color:var(--text-white)" data-i18n="step2_title">Smart matching</h3>
+      <p class="text-sm leading-relaxed" style="color:#64748b" data-i18n="step2_desc">Our engine analyses profiles and ranks the best fit for every search query automatically.</p>
+    </div>
+    <div class="feature-card rounded-2xl p-6 relative">
+      <span class="absolute top-4 right-4 text-3xl font-black" style="color:rgba(20,184,166,.12)">03</span>
+      <p class="text-3xl mb-3">🤝</p>
+      <h3 class="font-bold text-base mb-2" style="color:var(--text-white)" data-i18n="step3_title">Connect &amp; hire</h3>
+      <p class="text-sm leading-relaxed" style="color:#64748b" data-i18n="step3_desc">Employers search candidates, post ads, send outreach. Candidates apply and track progress live.</p>
+    </div>
+  </div>
+
+  <!-- Role cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="role-card rounded-2xl p-7" style="background:linear-gradient(135deg,#0d1a1a 60%,#091414)">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl" style="background:rgba(20,184,166,.15)">👤</div>
+        <div>
+          <h3 class="font-bold text-lg" style="color:var(--text-white)" data-i18n="for_job_seekers">For Job Seekers</h3>
+          <p class="text-xs" style="color:#64748b" data-i18n="find_next_opp">Find your next opportunity</p>
+        </div>
+      </div>
+      <ul class="space-y-3 mb-6">
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="cand_li1">Build a rich profile with CV, skills and portfolio</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="cand_li2">Get job recommendations matched to your expertise</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="cand_li3">Apply with one click and track your pipeline</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="cand_li4">Receive direct outreach from top employers</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="cand_li5">Rate companies after your hiring experience</span></li>
+      </ul>
+      <a href="/auth/register?role=CANDIDATE" class="btn-primary block text-center py-3 rounded-xl" data-i18n="create_candidate_account">Create Candidate Account</a>
+    </div>
+
+    <div class="role-card rounded-2xl p-7" style="background:linear-gradient(135deg,#0d1a1a 60%,#091414)">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl" style="background:rgba(20,184,166,.15)">🏢</div>
+        <div>
+          <h3 class="font-bold text-lg" style="color:var(--text-white)" data-i18n="for_employers">For Employers</h3>
+          <p class="text-xs" style="color:#64748b" data-i18n="build_dream_team">Build your dream team</p>
+        </div>
+      </div>
+      <ul class="space-y-3 mb-6">
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li1">Showcase your company culture and benefits</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li2">Post job ads with salary, skills and work mode</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li3">Search candidates by profession using plain English</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li4">Send personalised direct outreach messages</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li5">Manage applicants through a visual pipeline</span></li>
+        <li class="flex items-start gap-2.5 text-sm" style="color:#94a3b8"><span class="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style="background:rgba(20,184,166,.2);color:#14b8a6;font-size:.6rem;font-weight:900">✓</span><span data-i18n="emp_li6">Build employer reputation with candidate ratings</span></li>
+      </ul>
+      <a href="/auth/register?role=EMPLOYER" class="btn-primary block text-center py-3 rounded-xl" data-i18n="start_hiring_today">Start Hiring Today</a>
+    </div>
+  </div>
+</section>
+
+<!-- LATEST JOBS -->
+{% if job_previews %}
+<section style="background:#0a1515;border-top:1px solid #1a3333;border-bottom:1px solid #1a3333">
+  <div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color:#14b8a6" data-i18n="live_openings">Live openings</p>
+        <h2 class="text-2xl font-extrabold" style="color:var(--text-white)" data-i18n="latest_jobs">Latest Job Posts</h2>
+      </div>
+      <a href="/jobs" class="btn-secondary px-5 py-2" data-i18n="view_all">View all →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for item in job_previews %}
+      <a href="/jobs/{{ item.job.id }}" class="job-card rounded-xl p-5 flex flex-col gap-3 block">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="font-semibold text-sm leading-snug" style="color:var(--text-white)">{{ item.job.title }}</h3>
+            <p class="text-xs mt-0.5" style="color:#64748b">{{ item.employer.company_name }}</p>
+          </div>
+          {% if item.job.work_mode %}
+          <span class="pill shrink-0" style="background:rgba(20,184,166,.12);color:#2dd4bf;border:1px solid rgba(20,184,166,.25)">{{ item.job.work_mode }}</span>
+          {% endif %}
+        </div>
+        <p class="text-xs leading-relaxed line-clamp-2" style="color:#64748b">{{ item.job.description[:130] }}</p>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs mt-auto pt-2" style="border-top:1px solid #1a3333;color:#475569">
+          {% if item.job.location %}<span>📍 {{ item.job.location }}</span>{% endif %}
+          {% if item.job.salary_range %}<span>💰 {{ item.job.salary_range }}</span>{% endif %}
+          {% if item.job.job_type %}<span>⏱ {{ item.job.job_type.replace('_',' ').title() }}</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FEATURES GRID -->
+<section class="max-w-5xl mx-auto px-4 py-20">
+  <div class="text-center mb-10">
+    <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#14b8a6" data-i18n="everything_you_need">Everything you need</p>
+    <h2 class="text-3xl font-extrabold" style="color:var(--text-white)" data-i18n="platform_features">Platform Features</h2>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🔍</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat1_title">Smart Search</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat1_desc">Describe who you need in plain English — no boolean filters needed</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🏆</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat2_title">Two-Way Ratings</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat2_desc">Candidates rate employers, employers rate candidates. Trust through transparency.</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">📬</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat3_title">Direct Outreach</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat3_desc">Employers reach top candidates privately before they apply elsewhere.</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">📊</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat4_title">Hiring Pipeline</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat4_desc">Applied → Screening → Interview → Test → Offer → Onboarded</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🔔</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat5_title">Smart Alerts</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat5_desc">Get notified instantly about outreach, matches and status changes.</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">📄</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat6_title">CV Storage</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat6_desc">Upload CVs stored securely in the database — no external file servers.</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🤝</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat7_title">Social Profiles</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat7_desc">Public profiles with rich info visible to both sides — like LinkedIn.</p></div>
+    <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🔒</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat8_title">Privacy Controls</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat8_desc">Toggle searchability and open-to-work status anytime.</p></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="max-w-3xl mx-auto px-4 pb-24">
+  <div class="rounded-2xl p-10 text-center relative overflow-hidden" style="background:linear-gradient(135deg,#0d1f1f,#091414);border:1px solid rgba(20,184,166,.3)">
+    <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse,rgba(20,184,166,.12),transparent 70%);pointer-events:none"></div>
+    <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:#14b8a6" data-i18n="ready_start">Ready to start?</p>
+    <h2 class="text-3xl font-extrabold mb-3" style="color:var(--text-white)" data-i18n="cta_headline">Your next hire — or next role — is here.</h2>
+    <p class="mb-7" style="color:#64748b;font-size:.95rem" data-i18n="cta_sub">Join SmartRecruit and experience hiring that actually works.</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="/auth/register?role=CANDIDATE" class="btn-primary px-8 py-3 text-base rounded-xl" data-i18n="looking_for_work">I'm Looking for Work</a>
+      <a href="/auth/register?role=EMPLOYER" class="px-8 py-3 text-base rounded-xl font-semibold" style="background:rgba(20,184,166,.1);color:#2dd4bf;border:1px solid rgba(20,184,166,.3);transition:background .15s" onmouseover="this.style.background='rgba(20,184,166,.2)'" onmouseout="this.style.background='rgba(20,184,166,.1)'" data-i18n="im_hiring">I'm Hiring</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

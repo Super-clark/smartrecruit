@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}My Applications — SmartRecruit{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">My Applications</h1>
+    <a href="/jobs" class="btn-secondary px-4 py-2 text-sm">Browse more jobs</a>
+  </div>
+
+  <!-- Pipeline legend -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    {% for stage in pipeline %}
+    <span class="pill bg-slate-800 text-slate-400 border border-slate-700">{{ stage.value }}</span>
+    {% endfor %}
+  </div>
+
+  {% if apps %}
+  <div class="space-y-4">
+    {% for item in apps %}
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <a href="/jobs/{{ item.job.id }}" class="font-bold text-white hover:text-brand-400 text-base">{{ item.job.title }}</a>
+          <p class="text-sm text-slate-400 mt-0.5">{{ item.employer.company_name }}</p>
+          <p class="text-xs text-slate-500 mt-1">Applied {{ item.app.applied_at.strftime('%d %b %Y') }}</p>
+          {% if item.app.employer_note %}
+          <div class="mt-2 p-2 bg-slate-800 rounded-lg text-xs text-slate-300">
+            <span class="text-slate-500">Note from employer: </span>{{ item.app.employer_note }}
+          </div>
+          {% endif %}
+        </div>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <span class="pill
+            {% if item.app.status.value == 'APPLIED' %}bg-sky-500/15 text-sky-400 border border-sky-500/30
+            {% elif item.app.status.value == 'SCREENING' %}bg-amber-500/15 text-amber-400 border border-amber-500/30
+            {% elif item.app.status.value == 'INTERVIEW' %}bg-violet-500/15 text-violet-400 border border-violet-500/30
+            {% elif item.app.status.value == 'TEST' %}bg-orange-500/15 text-orange-400 border border-orange-500/30
+            {% elif item.app.status.value == 'OFFER' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30
+            {% elif item.app.status.value == 'ONBOARDED' %}bg-teal-500/15 text-teal-400 border border-teal-500/30
+            {% elif item.app.status.value == 'REJECTED' %}bg-red-500/15 text-red-400 border border-red-500/30
+            {% else %}bg-slate-700 text-slate-400{% endif %}">
+            {{ item.app.status.value }}
+          </span>
+          {% if item.app.status.value not in ['REJECTED','WITHDRAWN','ONBOARDED'] %}
+          <form method="post" action="/applications/{{ item.app.id }}/withdraw">
+            <button type="submit" class="text-xs text-red-400 hover:text-red-300">Withdraw</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Pipeline progress bar -->
+      {% set stages = ['APPLIED','SCREENING','INTERVIEW','TEST','OFFER','ONBOARDED'] %}
+      {% set current_idx = stages.index(item.app.status.value) if item.app.status.value in stages else -1 %}
+      {% if current_idx >= 0 %}
+      <div class="mt-4 flex gap-1">
+        {% for i in range(stages|length) %}
+        <div class="flex-1 h-1.5 rounded-full {{ 'bg-brand-500' if i <= current_idx else 'bg-slate-700' }}"></div>
+        {% endfor %}
+      </div>
+      <div class="flex justify-between mt-1">
+        {% for stage in stages %}
+        <span class="text-xs text-slate-600">{{ stage[:3] }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-20 text-slate-500">
+    <p class="text-5xl mb-4">📋</p>
+    <p class="text-lg font-medium text-white mb-2">No applications yet</p>
+    <a href="/jobs" class="btn-primary px-6 py-2 mt-2 inline-block">Find jobs →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

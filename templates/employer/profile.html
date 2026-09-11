@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Edit Company Profile — SmartRecruit{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">Edit Company Profile</h1>
+    {% if profile %}
+    <a href="/profile/employer/{{ profile.id }}" class="btn-secondary px-4 py-2 text-sm">View Public Profile</a>
+    {% endif %}
+  </div>
+
+  {% if error %}<div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{{ error }}</div>{% endif %}
+  {% if success %}<div class="mb-4 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">{{ success }}</div>{% endif %}
+
+  <form method="post" action="/profile/edit" enctype="multipart/form-data" class="space-y-6">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+      <h2 class="font-semibold text-white mb-4">Company Identity</h2>
+      <div class="flex items-start gap-5 mb-5">
+        <div class="shrink-0">
+          <img src="/profile/avatar/{{ user.id }}" class="w-20 h-20 rounded-full object-cover border-2 border-slate-700" id="logo-preview"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;80&quot; height=&quot;80&quot;><circle cx=&quot;40&quot; cy=&quot;40&quot; r=&quot;40&quot; fill=&quot;%234c1d95&quot;/></svg>'"/>
+          <label class="block text-center text-xs text-brand-400 hover:underline cursor-pointer mt-2">
+            Upload Logo
+            <input type="file" name="logo" accept="image/*" class="hidden" onchange="previewLogo(this)"/>
+          </label>
+        </div>
+        <div class="flex-1 grid grid-cols-2 gap-3">
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Company Name *</label>
+            <input type="text" name="company_name" value="{{ profile.company_name if profile else '' }}" required/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Industry</label>
+            <input type="text" name="industry" value="{{ profile.industry if profile else '' }}" placeholder="Technology, Finance…"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Company Size</label>
+            <select name="company_size">
+              <option value="">Select…</option>
+              {% for sz in ['1-10','11-50','51-200','201-500','501-1000','1000+'] %}
+              <option value="{{ sz }} employees" {{ 'selected' if profile and profile.company_size == sz + ' employees' }}>{{ sz }} employees</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Founded Year</label>
+            <input type="number" name="founded_year" value="{{ profile.founded_year if profile else '' }}" placeholder="2015"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Website</label>
+            <input type="url" name="website" value="{{ profile.website if profile else '' }}" placeholder="https://…"/>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Location</label>
+            <input type="text" name="location" value="{{ profile.location if profile else '' }}" placeholder="City, Country"/>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Company Description</label>
+        <textarea name="description" rows="3" placeholder="What does your company do?">{{ profile.description if profile else '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+      <h2 class="font-semibold text-white mb-4">Work Environment</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Work Mode</label>
+          <select name="work_mode">
+            <option value="">Select…</option>
+            {% for wm in ['ONSITE','REMOTE','HYBRID'] %}
+            <option value="{{ wm }}" {{ 'selected' if profile and profile.work_mode == wm }}>{{ wm.title() }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Work Environment & Culture</label>
+          <textarea name="work_environment" rows="3" placeholder="Describe your team culture, how you work, office setup…">{{ profile.work_environment if profile else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Benefits & Perks</label>
+          <textarea name="benefits" rows="2" placeholder="Health insurance, flexible hours, stock options…">{{ profile.benefits if profile else '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+      <h2 class="font-semibold text-white mb-4">Contact Person</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Contact Name</label>
+          <input type="text" name="contact_name" value="{{ profile.contact_name if profile else '' }}" placeholder="HR Manager name"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Contact Phone</label>
+          <input type="text" name="contact_phone" value="{{ profile.contact_phone if profile else '' }}" placeholder="+1 555 000 0000"/>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">LinkedIn URL</label>
+          <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile else '' }}" placeholder="https://linkedin.com/company/…"/>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary w-full py-3 text-base">Save Company Profile</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function previewLogo(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => document.getElementById('logo-preview').src = e.target.result;
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+{% endblock %}

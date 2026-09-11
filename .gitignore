@@ -1,0 +1,74 @@
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+pip-wheel-metadata/
+
+# ── Virtual environments ──────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env.local
+.env.*.local
+
+# ── Secrets & credentials (NEVER commit these) ───────────────────────────
+.env
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+
+# ── Database & vector storage ─────────────────────────────────────────────
+*.db
+*.sqlite3
+qdrant_storage/
+vector_store/
+
+# ── Qdrant binary (download separately) ──────────────────────────────────
+qdrant.exe
+qdrant
+qdrant-*
+
+# ── Uploads & generated files ─────────────────────────────────────────────
+static/uploads/
+*.log
+*.tmp
+
+# ── IDE & editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ── Testing ───────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ── Type checking ─────────────────────────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+
+# ── Misc ──────────────────────────────────────────────────────────────────
+*.bak
+*.orig
+node_modules/

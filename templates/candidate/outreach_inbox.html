@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Messages — SmartRecruit{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold" style="color:var(--text-white)" data-i18n="messages">Messages</h1>
+      <p class="text-sm mt-0.5" style="color:var(--text-muted)" data-i18n="outreach_from_employers">Outreach from employers</p>
+    </div>
+    <a href="/dashboard/candidate" class="btn-secondary px-4 py-2 text-sm" data-i18n="back_dashboard">← Dashboard</a>
+  </div>
+
+  {% if replied %}
+  <div class="mb-5 px-4 py-3 rounded-xl text-sm font-medium" style="background:rgba(20,184,166,.1);color:#14b8a6;border:1px solid rgba(20,184,166,.25)" data-i18n="reply_sent">
+    ✓ Your reply was sent successfully.
+  </div>
+  {% endif %}
+  {% if error == 'empty' %}
+  <div class="mb-5 px-4 py-3 rounded-xl text-sm" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25)">
+    Reply cannot be empty.
+  </div>
+  {% endif %}
+
+  {% if threads %}
+  <div class="space-y-6">
+    {% for item in threads %}
+    {% set o = item.outreach %}
+    {% set emp = item.employer %}
+    {% set emp_user = item.emp_user %}
+    {% set job = item.job %}
+    {% set messages = item.messages %}
+
+    <div class="rounded-2xl overflow-hidden" style="background:var(--bg-card);border:1px solid var(--border)">
+
+      <!-- Thread header -->
+      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border)">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="relative w-10 h-10 shrink-0">
+            <img src="/profile/avatar/{{ emp_user.id if emp_user else 0 }}"
+                 class="w-10 h-10 rounded-full object-cover absolute inset-0"
+                 style="border:2px solid var(--border)"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+            <div class="w-10 h-10 rounded-full items-center justify-center text-white text-sm font-bold hidden"
+                 style="background:var(--teal)">
+              {{ (emp.company_name or '?')[0].upper() }}
+            </div>
+          </div>
+          <div class="min-w-0">
+            <a href="/profile/employer/{{ emp.id }}"
+               class="font-semibold text-sm transition-colors hover:underline"
+               style="color:var(--text-white)">{{ emp.company_name }}</a>
+            {% if job %}
+            <p class="text-xs mt-0.5" style="color:var(--text-muted)">Re: {{ job.title }}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs" style="color:var(--text-muted)">{{ o.created_at.strftime('%d %b %Y') }}</span>
+          <span class="pill
+            {% if o.status.value == 'ACCEPTED' %}status-offer
+            {% elif o.status.value == 'REJECTED' %}status-rejected
+            {% else %}status-applied{% endif %}">
+            {{ o.status.value }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Message thread -->
+      <div class="px-5 py-4 space-y-4 max-h-96 overflow-y-auto" id="thread-{{ o.id }}">
+        {% for msg in messages %}
+        {% set is_mine = msg.sender_role == 'CANDIDATE' %}
+        <div class="flex gap-3 {% if is_mine %}flex-row-reverse{% endif %}">
+          <!-- Avatar -->
+          {% if is_mine %}
+          <div class="relative w-7 h-7 shrink-0 mt-0.5">
+            <img src="/profile/avatar/{{ user.id }}"
+                 class="w-7 h-7 rounded-full object-cover absolute inset-0"
+                 style="border:2px solid rgba(20,184,166,.3)"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+            <div class="w-7 h-7 rounded-full items-center justify-center text-white text-xs font-bold hidden"
+                 style="background:var(--teal)">
+              {{ user.email[0].upper() }}
+            </div>
+          </div>
+          {% else %}
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+               style="background:#0f766e">
+            {{ (emp.company_name or 'E')[0].upper() }}
+          </div>
+          {% endif %}
+
+          <!-- Bubble -->
+          <div class="flex-1 min-w-0 {% if is_mine %}text-right{% endif %}">
+            <p class="text-xs font-semibold mb-1"
+               style="color:{% if is_mine %}var(--teal){% else %}var(--text-muted){% endif %}">
+              {% if is_mine %}You{% else %}{{ emp.company_name }}{% endif %}
+              · {{ msg.created_at.strftime('%d %b, %H:%M') }}
+            </p>
+            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap text-left px-4 py-2.5 rounded-xl"
+                 style="{% if is_mine %}background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.25);color:var(--text-body);max-width:85%{% else %}background:var(--bg-input);border:1px solid var(--border);color:var(--text-body);max-width:85%{% endif %}">
+              {{ msg.body }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        {% if not messages %}
+        <!-- Fallback: show original message if no thread messages seeded yet -->
+        {% if o.message %}
+        <div class="flex gap-3">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+               style="background:#0f766e">
+            {{ (emp.company_name or 'E')[0].upper() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold mb-1" style="color:var(--text-muted)">
+              {{ emp.company_name }} · {{ o.created_at.strftime('%d %b, %H:%M') }}
+            </p>
+            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap px-4 py-2.5 rounded-xl"
+                 style="background:var(--bg-input);border:1px solid var(--border);color:var(--text-body);max-width:85%">
+              {{ o.message }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- Reply form -->
+      <div class="px-5 pb-4 pt-3" style="border-top:1px solid var(--border)">
+        <form method="post" action="/outreach/{{ o.id }}/reply" class="flex gap-2 items-end">
+          <textarea name="reply" rows="2" required
+            placeholder="Write your reply…"
+            class="flex-1 text-sm resize-none" style="min-height:3rem"></textarea>
+          <button type="submit" class="btn-primary px-4 py-2 self-end shrink-0" data-i18n="send">Send</button>
+        </form>
+
+        <!-- Quick responses — only if no messages yet -->
+        {% if not messages and not o.candidate_reply %}
+        <div class="flex gap-2 mt-2">
+          <form method="post" action="/outreach/{{ o.id }}/reply" class="flex-1">
+            <input type="hidden" name="reply" value="Thank you for reaching out. I'm interested and happy to discuss further."/>
+            <button type="submit" class="w-full text-xs py-2 rounded-lg font-semibold transition-colors"
+              style="background:rgba(20,184,166,.12);color:var(--teal);border:1px solid rgba(20,184,166,.25)"
+              onmouseover="this.style.background='rgba(20,184,166,.22)'"
+              onmouseout="this.style.background='rgba(20,184,166,.12)'">
+              ✓ Quick Accept
+            </button>
+          </form>
+          <form method="post" action="/outreach/{{ o.id }}/reply" class="flex-1">
+            <input type="hidden" name="reply" value="Thank you for your message. I'm not available for this opportunity at this time, but I appreciate you reaching out."/>
+            <button type="submit" class="w-full text-xs py-2 rounded-lg font-semibold transition-colors"
+              style="background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.2)"
+              onmouseover="this.style.background='rgba(239,68,68,.16)'"
+              onmouseout="this.style.background='rgba(239,68,68,.08)'">
+              ✗ Decline Politely
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-24" style="color:var(--text-muted)">
+    <p class="text-5xl mb-4">📭</p>
+    <p class="text-lg font-medium mb-2" style="color:var(--text-white)" data-i18n="no_messages">No messages yet</p>
+    <p class="text-sm mb-6">When employers reach out to you, their messages will appear here.</p>
+    <a href="/jobs" class="btn-primary px-6 py-2" data-i18n="browse_jobs">Browse jobs →</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Auto-scroll each thread to the bottom
+  document.querySelectorAll('[id^="thread-"]').forEach(el => {
+    el.scrollTop = el.scrollHeight;
+  });
+</script>
+{% endblock %}

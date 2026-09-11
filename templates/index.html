@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartRecruit — Smart Talent Matchmaking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 400: "#a78bfa", 500: "#8b5cf6", 600: "#7c3aed", 700: "#6d28d9" }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* smooth card hover lift */
+    .card-lift { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .card-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(139,92,246,.25); }
+    /* score pill gradient */
+    .score-pill { background: linear-gradient(135deg,#6d28d9,#a78bfa); }
+    /* skeleton shimmer */
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .skeleton { background: linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);
+                background-size: 400px 100%; animation: shimmer 1.4s infinite; }
+  </style>
+</head>
+
+<body class="h-full text-slate-200 antialiased">
+
+  <!-- ===== TOP NAV ===== -->
+  <header class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 select-none">
+        <span class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3
+            3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0
+            019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        <span class="text-lg font-bold tracking-tight text-white">SmartRecruit</span>
+        <span class="hidden sm:inline text-xs font-medium px-2 py-0.5 rounded-full bg-brand-600/20 text-brand-400 border border-brand-600/30">PRO</span>
+      </a>
+
+      <!-- Nav links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+        <a href="#search"    class="hover:text-white transition-colors">Search</a>
+        <a href="#candidates" class="hover:text-white transition-colors">Candidates</a>
+        <a href="#employers"  class="hover:text-white transition-colors">Employers</a>
+        <a href="/schema/swagger" target="_blank"
+           class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+          API Docs
+        </a>
+      </nav>
+
+      <!-- Mobile menu button (cosmetic) -->
+      <button class="md:hidden p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800" aria-label="Menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="relative overflow-hidden">
+    <!-- Ambient glow -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-brand-700/20 blur-3xl"></div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
+      <span class="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-600/15 text-brand-400 border border-brand-600/25 mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"></span>
+        Smart candidate matching
+      </span>
+
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+        Find the right talent,<br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-violet-300">not just the right keywords</span>
+      </h1>
+
+      <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
+        Describe the person you're looking for in plain English. Our search engine
+        ranks candidates by relevance — no boolean tricks required.
+      </p>
+
+      <!-- ===== SEARCH BOX ===== -->
+      <div id="search" class="relative max-w-2xl mx-auto">
+        <div class="flex rounded-xl overflow-hidden border border-slate-700 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/30 bg-slate-900 transition-all shadow-xl">
+          <span class="flex items-center pl-4 text-slate-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+            </svg>
+          </span>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder='e.g. "Senior Python engineer with ML and cloud experience"'
+            class="flex-1 bg-transparent py-4 px-3 text-white placeholder-slate-500 focus:outline-none text-sm sm:text-base"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button
+            id="searchBtn"
+            onclick="runSearch()"
+            class="px-5 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-semibold text-sm transition-colors whitespace-nowrap"
+          >
+            Search
+          </button>
+        </div>
+
+        <!-- Quick example chips -->
+        <div class="flex flex-wrap gap-2 mt-3 justify-center">
+          <span class="text-xs text-slate-500 self-center">Try:</span>
+          <button onclick="fillQuery('Full-stack React and Node.js developer')"
+            class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            Full-stack React developer
+          </button>
+          <button onclick="fillQuery('Data scientist with Python and data analysis expertise')"
+            class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            Data scientist
+          </button>
+          <button onclick="fillQuery('DevOps engineer experienced with Kubernetes and AWS')"
+            class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            DevOps / K8s
+          </button>
+          <button onclick="fillQuery('Product manager with agile and B2B SaaS background')"
+            class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors">
+            Product manager
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEARCH RESULTS ===== -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+    <div id="searchStatus" class="hidden text-center py-4 text-slate-400 text-sm"></div>
+    <div id="searchResults" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </section>
+
+  <!-- ===== DIVIDER ===== -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="border-t border-slate-800"></div>
+  </div>
+
+  <!-- ===== ALL CANDIDATES ===== -->
+  <section id="candidates" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-white">Candidate Pool</h2>
+        <p class="text-slate-400 text-sm mt-1">All searchable profiles in the database</p>
+      </div>
+      <button onclick="loadCandidates()"
+        class="text-sm px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+    <div id="candidateGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Skeleton placeholders -->
+      <div class="skeleton h-44 rounded-xl"></div>
+      <div class="skeleton h-44 rounded-xl"></div>
+      <div class="skeleton h-44 rounded-xl"></div>
+      <div class="skeleton h-44 rounded-xl"></div>
+      <div class="skeleton h-44 rounded-xl"></div>
+      <div class="skeleton h-44 rounded-xl"></div>
+    </div>
+    <div class="flex justify-center mt-8 gap-3" id="candidatePagination"></div>
+  </section>
+
+  <!-- ===== EMPLOYERS ===== -->
+  <section id="employers" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-white">Employers</h2>
+        <p class="text-slate-400 text-sm mt-1">Companies actively recruiting on the platform</p>
+      </div>
+    </div>
+    <div id="employerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="skeleton h-36 rounded-xl"></div>
+      <div class="skeleton h-36 rounded-xl"></div>
+      <div class="skeleton h-36 rounded-xl"></div>
+    </div>
+  </section>
+
+  <!-- ===== CANDIDATE DETAIL MODAL ===== -->
+  <div id="detailModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+    onclick="closeModal(event)">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
+         onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 border-b border-slate-800">
+        <h3 class="text-lg font-bold text-white" id="modalTitle">Candidate Detail</h3>
+        <button onclick="closeModal()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="p-6" id="modalContent">
+        <div class="skeleton h-6 rounded mb-3 w-2/3"></div>
+        <div class="skeleton h-4 rounded mb-2 w-full"></div>
+        <div class="skeleton h-4 rounded mb-2 w-5/6"></div>
+        <div class="skeleton h-4 rounded w-3/4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast"
+    class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white shadow-xl flex items-center gap-3 max-w-xs">
+    <span id="toastIcon"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="mt-16 border-t border-slate-800 bg-slate-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-slate-500">© 2026 SmartRecruit Platform. All rights reserved.</p>
+      <div class="flex items-center gap-4 text-sm text-slate-500">
+        <a href="/schema/swagger" target="_blank" class="hover:text-slate-300 transition-colors">Swagger UI</a>
+        <a href="/schema/redoc"   target="_blank" class="hover:text-slate-300 transition-colors">ReDoc</a>
+        <a href="/schema"         target="_blank" class="hover:text-slate-300 transition-colors">OpenAPI JSON</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================
+       JAVASCRIPT
+  =================================================== -->
+  <script>
+    // ─── State ────────────────────────────────────────────────────────────────
+    let candidatePage = 0;
+    const PAGE_SIZE   = 9;
+
+    // ─── Utility ──────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'info') {
+      const icons = { info: '💡', success: '✅', error: '❌', loading: '⏳' };
+      const el   = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent  = msg;
+      document.getElementById('toastIcon').textContent = icons[type] || '💡';
+      el.classList.remove('hidden');
+      if (type !== 'loading') setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+    function hideToast() { document.getElementById('toast').classList.add('hidden'); }
+
+    function skillBadges(skills) {
+      if (!skills) return '';
+      return skills.split(',').map(s => s.trim()).filter(Boolean).map(s =>
+        `<span class="inline-block text-xs px-2 py-0.5 rounded-full bg-brand-600/20
+                      text-brand-400 border border-brand-600/30">${escHtml(s)}</span>`
+      ).join(' ');
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.appendChild(document.createTextNode(str ?? ''));
+      return d.innerHTML;
+    }
+
+    function expBadge(years) {
+      const y = parseInt(years) || 0;
+      const color = y >= 8 ? 'text-amber-400 bg-amber-400/10 border-amber-400/30'
+                  : y >= 4 ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30'
+                  :          'text-sky-400 bg-sky-400/10 border-sky-400/30';
+      return `<span class="inline-block text-xs px-2 py-0.5 rounded-full border ${color}">
+                ${y}yr${y !== 1 ? 's' : ''} exp
+              </span>`;
+    }
+
+    function scoreBadge(score) {
+      const pct = Math.round(score * 100);
+      const color = pct >= 80 ? 'bg-emerald-500' : pct >= 55 ? 'bg-brand-500' : 'bg-slate-600';
+      return `<span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full
+                           score-pill text-white font-semibold">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                ${pct}% match
+              </span>`;
+    }
+
+    // ─── Candidate card builder ────────────────────────────────────────────────
+    function buildCandidateCard(c, score = null) {
+      const avatar = (c.title || 'U').charAt(0).toUpperCase();
+      const colors = ['bg-brand-600','bg-violet-600','bg-indigo-600','bg-sky-600','bg-teal-600','bg-amber-600'];
+      const bg     = colors[(c.id || 0) % colors.length];
+
+      return `
+        <article class="card-lift bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-4
+                        hover:border-brand-600/50 cursor-pointer group"
+                 onclick="openCandidate(${c.candidate_id ?? c.id})">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full ${bg} flex items-center justify-center
+                          text-white font-bold text-sm select-none">
+                ${avatar}
+              </div>
+              <div class="min-w-0">
+                <h3 class="font-semibold text-white text-sm leading-tight truncate group-hover:text-brand-400 transition-colors">
+                  ${escHtml(c.title || 'Untitled Profile')}
+                </h3>
+                <p class="text-xs text-slate-500 truncate mt-0.5">ID #${c.candidate_id ?? c.id}</p>
+              </div>
+            </div>
+            <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
+              ${score !== null ? scoreBadge(score) : ''}
+              ${expBadge(c.experience_years)}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 min-h-[1.5rem]">
+            ${skillBadges(c.skills) || '<span class="text-xs text-slate-600 italic">No skills listed</span>'}
+          </div>
+
+          <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-800">
+            <span class="text-xs text-slate-500 truncate">${escHtml(c.user_email || '')}</span>
+            <span class="text-xs text-brand-400 font-medium group-hover:underline whitespace-nowrap ml-2">
+              View profile →
+            </span>
+          </div>
+        </article>`;
+    }
+
+    // ─── SEARCH ───────────────────────────────────────────────────────────────
+    function fillQuery(text) {
+      document.getElementById('searchInput').value = text;
+      runSearch();
+    }
+
+    async function runSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) { showToast('Please enter a search query.', 'info'); return; }
+
+      const resultsEl = document.getElementById('searchResults');
+      const statusEl  = document.getElementById('searchStatus');
+      const btn       = document.getElementById('searchBtn');
+
+      btn.disabled    = true;
+      btn.textContent = 'Searching…';
+      resultsEl.innerHTML = [0,1,2,3,4,5].map(() =>
+        `<div class="skeleton h-44 rounded-xl"></div>`).join('');
+      statusEl.classList.add('hidden');
+      showToast('Searching candidates…', 'loading');
+
+      try {
+        const res  = await fetch(`/candidates/search?q=${encodeURIComponent(q)}&limit=9`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        hideToast();
+        resultsEl.innerHTML = '';
+
+        if (!data.length) {
+          statusEl.textContent = `No candidates matched "${q}". Try a different query.`;
+          statusEl.classList.remove('hidden');
+          return;
+        }
+
+        statusEl.textContent = `${data.length} result${data.length !== 1 ? 's' : ''} for "${q}"`;
+        statusEl.classList.remove('hidden');
+        data.forEach(c => {
+          resultsEl.insertAdjacentHTML('beforeend', buildCandidateCard(c, c.score));
+        });
+
+        document.getElementById('searchResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        hideToast();
+        showToast('Search failed: ' + err.message, 'error');
+        resultsEl.innerHTML = '';
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Search';
+      }
+    }
+
+    // Enter key support
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('searchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') runSearch();
+      });
+    });
+
+    // ─── LOAD CANDIDATES ──────────────────────────────────────────────────────
+    async function loadCandidates(page = 0) {
+      candidatePage = page;
+      const grid    = document.getElementById('candidateGrid');
+      grid.innerHTML = [0,1,2,3,4,5,6,7,8].map(() =>
+        `<div class="skeleton h-44 rounded-xl"></div>`).join('');
+
+      try {
+        const offset = page * PAGE_SIZE;
+        const res    = await fetch(`/candidates/?offset=${offset}&limit=${PAGE_SIZE}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data   = await res.json();
+
+        grid.innerHTML = '';
+        if (!data.length) {
+          grid.innerHTML = `<p class="col-span-3 text-center text-slate-500 py-12">No candidates found.</p>`;
+          return;
+        }
+        data.forEach(c => grid.insertAdjacentHTML('beforeend', buildCandidateCard(c)));
+        renderPagination(page, data.length);
+      } catch (err) {
+        grid.innerHTML = `<p class="col-span-3 text-center text-red-400 py-12">Failed to load candidates: ${err.message}</p>`;
+      }
+    }
+
+    function renderPagination(page, count) {
+      const el = document.getElementById('candidatePagination');
+      el.innerHTML = '';
+      if (page > 0) {
+        const prev = document.createElement('button');
+        prev.textContent = '← Prev';
+        prev.className   = 'px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm border border-slate-700 transition-colors';
+        prev.onclick     = () => loadCandidates(page - 1);
+        el.appendChild(prev);
+      }
+      if (count === PAGE_SIZE) {
+        const next = document.createElement('button');
+        next.textContent = 'Next →';
+        next.className   = 'px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm border border-slate-700 transition-colors';
+        next.onclick     = () => loadCandidates(page + 1);
+        el.appendChild(next);
+      }
+    }
+
+    // ─── LOAD EMPLOYERS ───────────────────────────────────────────────────────
+    async function loadEmployers() {
+      const grid = document.getElementById('employerGrid');
+      try {
+        const res  = await fetch('/employers/?limit=20');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        grid.innerHTML = '';
+        if (!data.length) {
+          grid.innerHTML = `<p class="col-span-3 text-center text-slate-500 py-12">No employers registered yet.</p>`;
+          return;
+        }
+
+        const industryIcons = {
+          Technology: '💻', Finance: '💰', Healthcare: '🏥',
+          Education: '🎓', 'E-commerce': '🛒', Consulting: '📊',
+          default: '🏢'
+        };
+
+        data.forEach(e => {
+          const icon = industryIcons[e.industry] || industryIcons.default;
+          grid.insertAdjacentHTML('beforeend', `
+            <article class="card-lift bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-3
+                            hover:border-brand-600/50">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl select-none">${icon}</span>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-white text-sm truncate">${escHtml(e.company_name)}</h3>
+                  <p class="text-xs text-slate-500">${escHtml(e.industry || 'General')}</p>
+                </div>
+              </div>
+              <div class="text-xs text-slate-500 truncate">${escHtml(e.user_email)}</div>
+              <a href="/employers/${e.id}/jobs"
+                 target="_blank"
+                 class="mt-auto text-xs text-brand-400 hover:underline font-medium">
+                View job posts →
+              </a>
+            </article>`);
+        });
+      } catch (err) {
+        grid.innerHTML = `<p class="col-span-3 text-center text-red-400 py-12">Failed to load employers: ${err.message}</p>`;
+      }
+    }
+
+    // ─── CANDIDATE DETAIL MODAL ───────────────────────────────────────────────
+    async function openCandidate(id) {
+      const modal   = document.getElementById('detailModal');
+      const title   = document.getElementById('modalTitle');
+      const content = document.getElementById('modalContent');
+
+      title.textContent  = 'Loading…';
+      content.innerHTML  = `
+        <div class="skeleton h-5 rounded mb-3 w-2/3"></div>
+        <div class="skeleton h-4 rounded mb-2 w-full"></div>
+        <div class="skeleton h-4 rounded mb-2 w-5/6"></div>
+        <div class="skeleton h-4 rounded w-3/4"></div>`;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      try {
+        const res  = await fetch(`/candidates/${id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const c    = await res.json();
+
+        title.textContent = c.title || 'Candidate Profile';
+        content.innerHTML = `
+          <div class="space-y-5">
+            <div class="flex flex-wrap gap-2 items-center">
+              ${expBadge(c.experience_years)}
+              <span class="text-xs text-slate-500">· ${escHtml(c.user_email)}</span>
+              ${c.is_searchable
+                ? `<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Searchable</span>`
+                : `<span class="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 border border-slate-600">Hidden</span>`
+              }
+            </div>
+
+            <div>
+              <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Skills</h4>
+              <div class="flex flex-wrap gap-1.5">
+                ${skillBadges(c.skills) || '<span class="text-sm text-slate-500 italic">No skills listed</span>'}
+              </div>
+            </div>
+
+            ${c.resume_text ? `
+            <div>
+              <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Resume</h4>
+              <div class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 text-sm text-slate-300
+                          leading-relaxed max-h-64 overflow-y-auto whitespace-pre-wrap font-mono text-xs">
+                ${escHtml(c.resume_text)}
+              </div>
+            </div>` : ''}
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+              <a href="/candidates/${c.id}"
+                 target="_blank"
+                 class="text-xs text-brand-400 hover:underline">
+                Raw JSON →
+              </a>
+              <button onclick="closeModal()"
+                class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-white transition-colors">
+                Close
+              </button>
+            </div>
+          </div>`;
+      } catch (err) {
+        content.innerHTML = `<p class="text-red-400">Failed to load profile: ${err.message}</p>`;
+      }
+    }
+
+    function closeModal(event) {
+      if (event && event.target !== document.getElementById('detailModal')) return;
+      document.getElementById('detailModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Escape key closes modal
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCandidates(0);
+      loadEmployers();
+    });
+  </script>
+</body>
+</html>

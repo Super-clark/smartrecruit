@@ -1,0 +1,13 @@
+# Qdrant standalone configuration
+# Place this file in the same folder as qdrant.exe
+
+service:
+  host: 0.0.0.0
+  http_port: 6333
+  grpc_port: 6334
+
+storage:
+  # Vectors and metadata are stored here (created automatically)
+  storage_path: ./qdrant_storage
+
+log_level: INFO

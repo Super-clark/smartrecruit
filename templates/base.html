@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SmartRecruit{% endblock %}</title>
+  <!-- Apply saved theme BEFORE paint to avoid flash -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('sr-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: {
+        teal: { 50:"#f0fdfa",100:"#ccfbf1",200:"#99f6e4",300:"#5eead4",400:"#2dd4bf",500:"#14b8a6",600:"#0d9488",700:"#0f766e",800:"#115e59",900:"#134e4a",950:"#042f2e" }
+      }}}
+    }
+  </script>
+  <style>
+    /* ── Dark mode (default) ─────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg-base:    #080f0f;
+      --bg-nav:     rgba(8,15,15,.92);
+      --bg-card:    #0d1a1a;
+      --bg-input:   #060e0e;
+      --bg-footer:  #0a1515;
+      --bg-hover:   #143030;
+      --border:     #1a3333;
+      --text-body:  #cbd5e1;
+      --text-muted: #64748b;
+      --text-soft:  #94a3b8;
+      --text-white: #ffffff;
+      --teal:       #14b8a6;
+      --teal-dim:   #0d9488;
+      --teal-light: #2dd4bf;
+      --teal-glow:  rgba(20,184,166,.15);
+      --shadow-card: 0 12px 32px rgba(20,184,166,.12);
+      --scrollbar-track: #0d1a1a;
+      --scrollbar-thumb: #1a3333;
+    }
+
+    /* ── Light mode ──────────────────────────────────────── */
+    [data-theme="light"] {
+      --bg-base:    #f0fafa;
+      --bg-nav:     rgba(240,250,250,.95);
+      --bg-card:    #ffffff;
+      --bg-input:   #f8fffe;
+      --bg-footer:  #e6f7f5;
+      --bg-hover:   #ccf2ee;
+      --border:     #b2e4de;
+      --text-body:  #1e3a38;
+      --text-muted: #4d7a75;
+      --text-soft:  #2d6b65;
+      --text-white: #0d2926;
+      --teal:       #0d9488;
+      --teal-dim:   #0f766e;
+      --teal-light: #0d9488;
+      --teal-glow:  rgba(13,148,136,.12);
+      --shadow-card: 0 4px 20px rgba(13,148,136,.1);
+      --scrollbar-track: #e6f7f5;
+      --scrollbar-thumb: #b2e4de;
+    }
+
+    /* ── Base styles ─────────────────────────────────────── */
+    html { background: var(--bg-base); }
+    body { background: var(--bg-base); color: var(--text-body); transition: background .25s, color .25s; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: .875rem; }
+    .card-lift { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+    .card-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-card); border-color: rgba(20,184,166,.4); }
+
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, var(--border) 50%, var(--bg-card) 75%); background-size: 400px 100%; animation: shimmer 1.4s infinite; border-radius: .5rem; }
+
+    .pill { display:inline-block; font-size:.7rem; padding:.2rem .65rem; border-radius:9999px; font-weight:600; line-height:1.4; }
+
+    input, textarea, select {
+      background: var(--bg-input);
+      color: var(--text-body);
+      border: 1px solid var(--border);
+      border-radius: .5rem;
+      padding: .55rem .75rem;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      font-size: .875rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px var(--teal-glow);
+    }
+    [data-theme="light"] input,
+    [data-theme="light"] textarea,
+    [data-theme="light"] select {
+      color: var(--text-body);
+    }
+
+    .btn-primary {
+      background: var(--teal); color: #fff;
+      padding: .5rem 1.25rem; border-radius: .5rem; font-weight: 600; font-size: .875rem;
+      transition: background .15s, box-shadow .15s; cursor: pointer; border: none;
+      display: inline-block; text-align: center; text-decoration: none;
+    }
+    .btn-primary:hover { background: var(--teal-dim); box-shadow: 0 4px 16px var(--teal-glow); }
+
+    .btn-secondary {
+      background: var(--bg-card); color: var(--text-soft);
+      padding: .5rem 1.25rem; border-radius: .5rem; font-weight: 600; font-size: .875rem;
+      transition: background .15s, color .15s; cursor: pointer;
+      border: 1px solid var(--border); display: inline-block; text-align: center; text-decoration: none;
+    }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-body); }
+
+    .btn-danger {
+      background: rgba(239,68,68,.1); color: #f87171;
+      padding: .5rem 1.25rem; border-radius: .5rem; font-weight: 600; font-size: .875rem;
+      transition: background .15s; cursor: pointer; border: 1px solid rgba(239,68,68,.25); display: inline-block;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,.2); }
+
+    .nav-link { color: var(--text-muted); font-size: .875rem; font-weight: 500; transition: color .15s; text-decoration: none; }
+    .nav-link:hover, .nav-link.active { color: var(--teal-light); }
+
+    /* Status pills */
+    .status-applied    { background:rgba(14,165,233,.12);  color:#38bdf8; border:1px solid rgba(14,165,233,.25); }
+    .status-screening  { background:rgba(245,158,11,.12);  color:#fbbf24; border:1px solid rgba(245,158,11,.25); }
+    .status-interview  { background:rgba(139,92,246,.12);  color:#a78bfa; border:1px solid rgba(139,92,246,.25); }
+    .status-test       { background:rgba(249,115,22,.12);  color:#fb923c; border:1px solid rgba(249,115,22,.25); }
+    .status-offer      { background:rgba(20,184,166,.12);  color:#2dd4bf; border:1px solid rgba(20,184,166,.25); }
+    .status-onboarded  { background:rgba(34,197,94,.12);   color:#4ade80; border:1px solid rgba(34,197,94,.25);  }
+    .status-rejected   { background:rgba(239,68,68,.12);   color:#f87171; border:1px solid rgba(239,68,68,.25);  }
+    .status-withdrawn  { background:rgba(100,116,139,.12); color:#94a3b8; border:1px solid rgba(100,116,139,.25);}
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius:3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--teal-dim); }
+
+    /* Theme toggle button */
+    #theme-toggle {
+      width: 2.25rem; height: 1.25rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      position: relative;
+      transition: background .2s, border-color .2s;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    #theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      border-radius: 9999px;
+      background: var(--teal);
+      transition: transform .2s, background .2s;
+    }
+    [data-theme="light"] #theme-toggle::after {
+      transform: translateX(1rem);
+      background: var(--teal-dim);
+    }
+    [data-theme="light"] #theme-toggle {
+      background: #ccf2ee;
+      border-color: #b2e4de;
+    }
+
+    /* Light mode nav */
+    [data-theme="light"] header {
+      background: var(--bg-nav) !important;
+      border-color: var(--border) !important;
+    }
+    [data-theme="light"] footer {
+      background: var(--bg-footer) !important;
+      border-color: var(--border) !important;
+    }
+
+    /* ── Global light mode overrides — covers all hardcoded dark values ─────── */
+    /* Card backgrounds */
+    [data-theme="light"] [style*="background:#0d1a1a"],
+    [data-theme="light"] [style*="background: #0d1a1a"] { background:#ffffff !important; }
+    [data-theme="light"] [style*="background:#060e0e"],
+    [data-theme="light"] [style*="background: #060e0e"] { background:#f0fafa !important; }
+    [data-theme="light"] [style*="background:#0a1515"] { background:#e6f7f5 !important; }
+    [data-theme="light"] [style*="background:#080f0f"] { background:#f0fafa !important; }
+    [data-theme="light"] [style*="background:#091414"],
+    [data-theme="light"] [style*="background:#0d1f1f"],
+    [data-theme="light"] [style*="background:#0f1f1f"],
+    [data-theme="light"] [style*="background:#0c1a2e"] { background:#f8fffe !important; }
+    /* Named card classes used in landing + dashboards */
+    [data-theme="light"] .stat-card     { background:linear-gradient(135deg,#f0fafa,#e6f7f5) !important; border-color:#b2e4de !important; }
+    [data-theme="light"] .feature-card  { background:#ffffff !important; border-color:#b2e4de !important; }
+    [data-theme="light"] .job-card      { background:#ffffff !important; border-color:#b2e4de !important; }
+    [data-theme="light"] .role-card     { background:linear-gradient(135deg,#f0fafa,#e6f7f5) !important; border-color:#b2e4de !important; }
+    [data-theme="light"] .section-card  { background:#ffffff !important; border-color:#b2e4de !important; }
+    [data-theme="light"] .card          { background:#ffffff !important; border-color:#b2e4de !important; }
+    /* Tailwind slate utility classes */
+    [data-theme="light"] .bg-slate-900,
+    [data-theme="light"] .bg-slate-950 { background-color:#ffffff !important; }
+    [data-theme="light"] .bg-slate-800\/50,
+    [data-theme="light"] .bg-slate-800 { background-color:#f0fafa !important; }
+    /* Borders */
+    [data-theme="light"] [style*="border:1px solid #1a3333"],
+    [data-theme="light"] [style*="border: 1px solid #1a3333"] { border-color:#b2e4de !important; }
+    [data-theme="light"] [style*="border-color:#1a3333"] { border-color:#b2e4de !important; }
+    [data-theme="light"] [style*="border-top:1px solid #1a3333"] { border-top-color:#b2e4de !important; }
+    [data-theme="light"] [style*="border-bottom:1px solid #1a3333"] { border-bottom-color:#b2e4de !important; }
+    [data-theme="light"] .border-slate-800,
+    [data-theme="light"] .border-slate-700 { border-color:#b2e4de !important; }
+    /* Sections with dark backgrounds */
+    [data-theme="light"] section[style*="background:#0a1515"] { background:#e6f7f5 !important; }
+    /* Progress track bars */
+    [data-theme="light"] [style*="background:#143030"] { background:#ccf2ee !important; }
+    [data-theme="light"] [style*="background:#1e3a3a"] { background:#b2e4de !important; }
+    /* Text */
+    [data-theme="light"] [style*="color:#64748b"] { color:#4d7a75 !important; }
+    [data-theme="light"] [style*="color:#94a3b8"] { color:#2d6b65 !important; }
+    [data-theme="light"] [style*="color:#cbd5e1"] { color:#1e3a38 !important; }
+    [data-theme="light"] [style*="color:#475569"] { color:#4d7a75 !important; }
+    [data-theme="light"] [style*="color:#334155"] { color:#5a8a84 !important; }
+    [data-theme="light"] [style*="color:#1e293b"] { color:#1e3a38 !important; }
+    [data-theme="light"] [style*="color:#e2e8f0"] { color:#1e3a38 !important; }
+    [data-theme="light"] .text-white     { color:#0d2926 !important; }
+    [data-theme="light"] .text-slate-400 { color:#4d7a75 !important; }
+    [data-theme="light"] .text-slate-500 { color:#5a8a84 !important; }
+    [data-theme="light"] .text-slate-300 { color:#1e3a38 !important; }
+    [data-theme="light"] .text-slate-200 { color:#1e3a38 !important; }
+    [data-theme="light"] .text-slate-600 { color:#4d7a75 !important; }
+    /* Hover states */
+    [data-theme="light"] .hover\:bg-slate-800:hover,
+    [data-theme="light"] .hover\:bg-slate-700:hover { background-color:#e6f7f5 !important; }
+    /* Gradient cards (inline style with hex) */
+    [data-theme="light"] [style*="background:linear-gradient(135deg,#0d1a1a"],
+    [data-theme="light"] [style*="background:linear-gradient(135deg,#0d1f1f"],
+    [data-theme="light"] [style*="background:linear-gradient(135deg,#0d1a1a 60%"] { background:linear-gradient(135deg,#f0fafa,#e6f7f5) !important; }
+    /* Hero grid dot pattern */
+    [data-theme="light"] .hero-grid { background-image:linear-gradient(rgba(20,184,166,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(20,184,166,.08) 1px,transparent 1px) !important; }
+    /* Skeleton */
+    [data-theme="light"] .skeleton { background:linear-gradient(90deg,#e6f7f5 25%,#ccf2ee 50%,#e6f7f5 75%) !important; }
+    /* Modal backdrops */
+    [data-theme="light"] [style*="background:rgba(3,7,15"],
+    [data-theme="light"] [style*="background:rgba(8,15,15"] { background:rgba(0,50,46,.55) !important; }
+    /* Modal panels */
+    [data-theme="light"] [style*="background:#0d1a1a;border:1px solid rgba(20,184,166"] { background:#ffffff !important; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+  <!-- ═══ NAV ═══ -->
+  <header class="sticky top-0 z-50 border-b" style="background:var(--bg-nav);backdrop-filter:blur(12px);border-color:var(--border)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 select-none shrink-0">
+        <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        <span class="text-base font-bold" style="color:var(--text-white)">SmartRecruit</span>
+        <span class="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-semibold" style="background:var(--teal-glow);color:var(--teal-light);border:1px solid rgba(20,184,166,.3)">PRO</span>
+      </a>
+
+      <!-- Center nav -->
+      <nav class="hidden md:flex items-center gap-6" id="main-nav">
+        <a href="/jobs"
+           class="nav-link" id="nav-jobs"
+           data-i18n="browse_jobs">Browse Jobs</a>
+        {% if user %}
+          {% if user.role == 'CANDIDATE' %}
+            <a href="/dashboard/candidate" class="nav-link" id="nav-dashboard" data-i18n="dashboard">Dashboard</a>
+            <a href="/applications"        class="nav-link" id="nav-applications" data-i18n="applications">Applications</a>
+            <a href="/outreach/inbox"      class="nav-link" id="nav-messages" data-i18n="messages">Messages</a>
+          {% elif user.role == 'EMPLOYER' %}
+            <a href="/dashboard/employer"      class="nav-link" id="nav-dashboard" data-i18n="dashboard">Dashboard</a>
+            <a href="/applications/employer"   class="nav-link" id="nav-applications" data-i18n="applicants">Applicants</a>
+            <a href="/outreach/employer-view"  class="nav-link" id="nav-messages" data-i18n="messages">Messages</a>
+            <a href="/employers/post-job"      class="nav-link" id="nav-postjob"
+               style="color:var(--teal-light)" data-i18n="post_job">+ Post Job</a>
+          {% endif %}
+        {% endif %}
+      </nav>
+
+      <!-- Right: language toggle + theme toggle + user controls -->
+      <div class="flex items-center gap-3">
+
+        <!-- Language switcher EN / አማርኛ -->
+        <div class="relative" id="lang-menu-root">
+          <button onclick="toggleLangMenu()"
+                  class="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
+                  style="color:var(--text-muted);border:1px solid var(--border);background:var(--bg-card)"
+                  onmouseover="this.style.color='var(--teal-light)';this.style.borderColor='rgba(20,184,166,.4)'"
+                  onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+            </svg>
+            <span id="lang-label">EN</span>
+          </button>
+          <div id="lang-dropdown" class="hidden absolute right-0 top-full mt-1.5 w-36 rounded-xl shadow-xl py-1 z-50"
+               style="background:var(--bg-card);border:1px solid var(--border)">
+            <button onclick="setLang('en')"
+                    class="w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2"
+                    style="color:var(--text-body)"
+                    onmouseover="this.style.background='var(--teal-glow)'"
+                    onmouseout="this.style.background='transparent'">
+              🇬🇧 English
+            </button>
+            <button onclick="setLang('am')"
+                    class="w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2"
+                    style="color:var(--text-body)"
+                    onmouseover="this.style.background='var(--teal-glow)'"
+                    onmouseout="this.style.background='transparent'">
+              🇪🇹 አማርኛ
+            </button>
+          </div>
+        </div>
+
+        <!-- Dark / Light toggle -->
+        <div class="flex items-center gap-1.5" title="Toggle dark/light mode">
+          <svg class="w-3.5 h-3.5" style="color:var(--text-muted)" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+          </svg>
+          <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+          <svg class="w-3.5 h-3.5" style="color:var(--text-muted)" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+
+        {% if user %}
+          <!-- Bell -->
+          <a href="/notifications" id="notif-bell" class="relative p-2 rounded-lg transition-colors"
+             style="color:var(--text-muted)"
+             onmouseover="this.style.color='var(--teal-light)';this.style.background='var(--teal-glow)'"
+             onmouseout="this.style.color='var(--text-muted)';this.style.background='transparent'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-xs items-center justify-center font-bold" style="font-size:.6rem"></span>
+          </a>
+
+          <!-- Avatar dropdown -->
+          <div class="relative" id="avatar-menu-root">
+            <button id="avatar-btn"
+              class="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors"
+              style="border:1px solid transparent"
+              onclick="toggleAvatarMenu()"
+              onmouseenter="this.style.background='var(--teal-glow)';this.style.borderColor='rgba(20,184,166,.2)'"
+              onmouseleave="this.style.background='transparent';this.style.borderColor='transparent'">
+              <img src="/profile/avatar/{{ user.id }}"
+                   class="w-7 h-7 rounded-full object-cover"
+                   style="border:2px solid var(--border)"
+                   alt="{{ user.email[0].upper() }}"
+                   onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;28&quot; height=&quot;28&quot;><circle cx=&quot;14&quot; cy=&quot;14&quot; r=&quot;14&quot; fill=&quot;%230f766e&quot;/><text x=&quot;14&quot; y=&quot;19&quot; text-anchor=&quot;middle&quot; fill=&quot;white&quot; font-size=&quot;12&quot; font-family=&quot;Arial&quot;>{{ user.email[0].upper() }}</text></svg>'"/>
+              <span class="hidden sm:inline text-sm font-medium" style="color:var(--text-body)">{{ user.email.split('@')[0] }}</span>
+              <svg class="w-3.5 h-3.5" style="color:var(--text-muted)" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <div id="avatar-dropdown"
+                 class="hidden absolute right-0 top-full mt-2 w-52 rounded-xl shadow-2xl py-1.5 z-50"
+                 style="background:var(--bg-card);border:1px solid var(--border)"
+                 onmouseenter="clearTimeout(window._menuClose)"
+                 onmouseleave="scheduleMenuClose()">
+              <div class="px-4 py-2.5 border-b" style="border-color:var(--border)">
+                <p class="text-xs font-semibold" style="color:var(--teal-light)">{{ user.email }}</p>
+                <p class="text-xs mt-0.5 capitalize" style="color:var(--text-muted)">{{ user.role.lower() if user.role else '' }} account</p>
+              </div>
+              {% for href, icon_path, label in [
+                ('/profile', 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'My Profile'),
+                ('/profile/edit', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', 'Edit Profile'),
+                ('/notifications', 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', 'Notifications'),
+              ] %}
+              <a href="{{ href }}"
+                 class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
+                 style="color:var(--text-body)"
+                 onmouseover="this.style.background='var(--teal-glow)';this.style.color='var(--text-white)'"
+                 onmouseout="this.style.background='transparent';this.style.color='var(--text-body)'">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/></svg>
+                {{ label }}
+              </a>
+              {% endfor %}
+              <div class="my-1.5" style="border-top:1px solid var(--border)"></div>
+              <form method="post" action="/auth/logout">
+                <button type="submit"
+                  class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
+                  style="color:#f87171;background:transparent;border:none;cursor:pointer;text-align:left"
+                  onmouseover="this.style.background='rgba(239,68,68,.08)'"
+                  onmouseout="this.style.background='transparent'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          </div>
+
+        {% else %}
+          <a href="/auth/login" class="btn-secondary text-sm px-4 py-2">Sign In</a>
+          <a href="/auth/register" class="btn-primary text-sm px-4 py-2">Get Started</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-16 border-t" style="background:var(--bg-footer);border-color:var(--border)">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <div class="flex flex-col sm:flex-row items-start justify-between gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </span>
+            <span class="font-bold" style="color:var(--text-white)">SmartRecruit</span>
+          </div>
+          <p class="text-xs" style="color:var(--text-muted)">Smart recruitment platform.<br/>Connecting talent with opportunity.</p>
+        </div>
+        <div class="flex gap-8 text-sm" style="color:var(--text-muted)">
+          <div>
+            <p class="font-semibold mb-2" style="color:var(--text-soft)">Platform</p>
+            <div class="space-y-1.5">
+              <a href="/jobs" class="block transition-colors" onmouseover="this.style.color='var(--teal-light)'" onmouseout="this.style.color='var(--text-muted)'">Browse Jobs</a>
+              <a href="/auth/register?role=CANDIDATE" class="block transition-colors" onmouseover="this.style.color='var(--teal-light)'" onmouseout="this.style.color='var(--text-muted)'">For Candidates</a>
+              <a href="/auth/register?role=EMPLOYER" class="block transition-colors" onmouseover="this.style.color='var(--teal-light)'" onmouseout="this.style.color='var(--text-muted)'">For Employers</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-t mt-8 pt-6" style="border-color:var(--border)">
+        <p class="text-xs text-center" style="color:var(--text-muted)">© 2026 SmartRecruit Platform. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Theme toggle ──────────────────────────────────────────────────────────
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = (html.getAttribute('data-theme') || 'dark') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('sr-theme', next);
+    }
+
+    // ── Active nav highlight ──────────────────────────────────────────────────
+    (function() {
+      const path = location.pathname;
+      const map = {
+        'nav-jobs':          ['/jobs'],
+        'nav-dashboard':     ['/dashboard/candidate', '/dashboard/employer', '/dashboard'],
+        'nav-applications':  ['/applications'],
+        'nav-messages':      ['/outreach/inbox', '/outreach/employer-view'],
+        'nav-postjob':       ['/employers/post-job'],
+      };
+      for (const [id, paths] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const active = paths.some(p => path === p || path.startsWith(p + '/') || path.startsWith(p + '?'));
+        if (active) {
+          el.style.color = 'var(--teal-light)';
+          el.style.fontWeight = '700';
+          el.style.borderBottom = '2px solid var(--teal)';
+          el.style.paddingBottom = '2px';
+        }
+      }
+    })();
+
+    // ── Avatar dropdown ───────────────────────────────────────────────────────
+    let _menuOpen = false;
+    function toggleAvatarMenu() {
+      const dd = document.getElementById('avatar-dropdown');
+      if (!dd) return;
+      _menuOpen = !_menuOpen;
+      dd.classList.toggle('hidden', !_menuOpen);
+    }
+    function scheduleMenuClose() {
+      window._menuClose = setTimeout(() => {
+        const dd = document.getElementById('avatar-dropdown');
+        if (dd) dd.classList.add('hidden');
+        _menuOpen = false;
+      }, 250);
+    }
+    document.addEventListener('click', function(e) {
+      const root = document.getElementById('avatar-menu-root');
+      if (root && !root.contains(e.target)) {
+        const dd = document.getElementById('avatar-dropdown');
+        if (dd) dd.classList.add('hidden');
+        _menuOpen = false;
+      }
+    });
+
+    // ── Notification badge polling ────────────────────────────────────────────
+    async function pollNotifications() {
+      try {
+        const r = await fetch('/notifications/count');
+        if (!r.ok) return;
+        const { unread } = await r.json();
+        const badge = document.getElementById('notif-badge');
+        if (!badge) return;
+        if (unread > 0) {
+          badge.textContent = unread > 9 ? '9+' : unread;
+          badge.classList.remove('hidden');
+          badge.classList.add('flex');
+        } else {
+          badge.classList.add('hidden');
+          badge.classList.remove('flex');
+        }
+      } catch {}
+    }
+    const _isLoggedIn = {{ 'true' if user else 'false' }};
+    if (_isLoggedIn) {
+      pollNotifications();
+      setInterval(pollNotifications, 30000);
+    }
+
+    // ── Language switcher ─────────────────────────────────────────────────────
+    const TRANSLATIONS = {
+      en: {
+        // Nav
+        browse_jobs:'Browse Jobs', dashboard:'Dashboard', applications:'Applications',
+        messages:'Messages', post_job:'+ Post Job', applicants:'Applicants',
+        sign_in:'Sign In', get_started:'Get Started',
+        my_profile:'My Profile', edit_profile:'Edit Profile',
+        notifications:'Notifications', sign_out:'Sign Out',
+        // Landing
+        hire_talent:'Hire Talent →', find_job:'Find a Job →',
+        looking_for_work:"I'm Looking for Work", im_hiring:"I'm Hiring",
+        how_it_works:'How SmartRecruit works', for_job_seekers:'For Job Seekers',
+        for_employers:'For Employers', latest_jobs:'Latest Job Posts',
+        platform_features:'Platform Features', ready_start:'Ready to start?',
+        active_candidates:'Active Candidates', open_positions:'Open Positions',
+        companies_hiring:'Companies Hiring',
+        // Landing page explicit keys
+        smart_matching:'Smart Candidate Matching',
+        hero_line1:'Stop searching.', hero_line2_prefix:'Start ', hero_line2_word:'connecting.',
+        hero_desc:'SmartRecruit uses smart profile matching to connect candidates and employers based on real skills and experience — not keyword luck. Describe what you need, and our engine finds who fits.',
+        social_proof:'candidates & companies already on the platform',
+        smart_search_label:'🔍 Smart Search', indexed_candidates:'indexed candidates',
+        open_positions_stat:'💼 Open Positions', actively_hiring:'actively hiring',
+        latest_match_label:'Latest match', match_score_label:'match score',
+        new_outreach_notif:'🔔 New outreach', techcorp_messaged:'TechCorp messaged you',
+        simple_process:'Simple process',
+        step1_title:'Create your profile', step1_desc:'Candidates add skills, CV and experience. Employers set up company info, culture and open roles.',
+        step2_title:'Smart matching', step2_desc:'Our engine analyses profiles and ranks the best fit for every search query automatically.',
+        step3_title:'Connect & hire', step3_desc:'Employers search candidates, post ads, send outreach. Candidates apply and track progress live.',
+        find_next_opp:'Find your next opportunity', build_dream_team:'Build your dream team',
+        cand_li1:'Build a rich profile with CV, skills and portfolio',
+        cand_li2:'Get job recommendations matched to your expertise',
+        cand_li3:'Apply with one click and track your pipeline',
+        cand_li4:'Receive direct outreach from top employers',
+        cand_li5:'Rate companies after your hiring experience',
+        create_candidate_account:'Create Candidate Account',
+        emp_li1:'Showcase your company culture and benefits',
+        emp_li2:'Post job ads with salary, skills and work mode',
+        emp_li3:'Search candidates by profession using plain English',
+        emp_li4:'Send personalised direct outreach messages',
+        emp_li5:'Manage applicants through a visual pipeline',
+        emp_li6:'Build employer reputation with candidate ratings',
+        start_hiring_today:'Start Hiring Today',
+        live_openings:'Live openings',
+        everything_you_need:'Everything you need',
+        feat1_title:'Smart Search', feat1_desc:'Describe who you need in plain English — no boolean filters needed',
+        feat2_title:'Two-Way Ratings', feat2_desc:'Candidates rate employers, employers rate candidates. Trust through transparency.',
+        feat3_title:'Direct Outreach', feat3_desc:'Employers reach top candidates privately before they apply elsewhere.',
+        feat4_title:'Hiring Pipeline', feat4_desc:'Applied → Screening → Interview → Test → Offer → Onboarded',
+        feat5_title:'Smart Alerts', feat5_desc:'Get notified instantly about outreach, matches and status changes.',
+        feat6_title:'CV Storage', feat6_desc:'Upload CVs stored securely in the database — no external file servers.',
+        feat7_title:'Social Profiles', feat7_desc:'Public profiles with rich info visible to both sides — like LinkedIn.',
+        feat8_title:'Privacy Controls', feat8_desc:'Toggle searchability and open-to-work status anytime.',
+        cta_headline:'Your next hire — or next role — is here.',
+        cta_sub:'Join SmartRecruit and experience hiring that actually works.',
+        // Dashboard
+        recent_applications:'Recent Applications', view_all:'View all →',
+        recommended:'Recommended for You', see_all:'See all →',
+        profile_strength:'Profile Strength', complete_profile:'Complete profile →',
+        saved_jobs:'Saved Jobs', active_jobs:'Active Job Posts',
+        recent_applicants:'Recent Applicants', candidate_search:'🔍 Candidate Search',
+        no_applicants_yet:'No applicants yet.', post_a_job:'Post a job →',
+        manage_all:'Manage all →', post_new:'+ Post new →',
+        edit_profile_btn:'Edit Profile', browse_jobs_btn:'Browse Jobs',
+        // Messages
+        outreach_from_employers:'Outreach from employers',
+        conversations_with:'Conversations with candidates',
+        back_dashboard:'← Dashboard', reply_sent:'✓ Your reply was sent successfully.',
+        send:'Send', no_messages:'No messages yet', your_reply:'You',
+        send_followup:'Send a follow-up message…', write_reply:'Write your reply…',
+        quick_accept:'✓ Quick Accept', decline_politely:'✗ Decline Politely',
+        // Jobs
+        browse_jobs_title:'Browse Jobs', search_btn:'Search', apply_now:'Apply Now',
+        save_job:'🔖 Save Job', submit_application:'Submit Application',
+        posted:'Posted', active:'Active', closed:'Closed',
+        required_skills:'Required Skills', open_positions_label:'Open Positions',
+        // Applications
+        my_applications:'My Applications', browse_more:'Browse more jobs',
+        no_applications:'No applications yet', pipeline_progress:'Pipeline Progress',
+        // Auth
+        create_account:'Create your account', already_have:'Already have one?',
+        sign_in_link:'Sign in', welcome_back:'Welcome back',
+        new_here:'New here?', create_account_link:'Create an account',
+        job_seeker:'👤 Job Seeker', employer_btn:'🏢 Employer',
+        // Profile
+        about:'About', technical_skills:'Technical Skills', soft_skills:'Soft Skills',
+        education:'Education', certifications:'Certifications', reviews:'Reviews',
+        open_to_work:'Open to Work', not_looking:'Not Looking',
+        contact_candidate:'📬 Message', message_sent:'✓ Message Sent', rate:'⭐ Rate',
+        about_company:'About the Company', work_environment:'Work Environment',
+        benefits_perks:'Benefits & Perks', no_reviews:'No reviews yet.',
+        download_cv:'📄 Download CV', view_profile:'View Profile',
+        view_public_profile:'View Public Profile',
+        // Notifications
+        all_caught_up:'All caught up', no_notif_yet:'No notifications yet.',
+        mark_all_read:'Mark all read',
+        // Ratings
+        leave_rating:'Leave a Rating', your_score:'Your score',
+        submit:'Submit', cancel:'Cancel',
+        // General
+        search:'Search', filter:'Filter', close:'Close', save:'Save',
+        yes:'Yes', no:'No', loading:'Loading…', error:'Error',
+        next:'Next →', prev:'← Previous',
+      },
+      am: {
+        // Nav
+        browse_jobs:'ስራዎችን ፈልግ', dashboard:'ዳሽቦርድ', applications:'ማመልከቻዎች',
+        messages:'መልዕክቶች', post_job:'+ ስራ ለጥፍ', applicants:'አመልካቾች',
+        sign_in:'ግባ', get_started:'ጀምር',
+        my_profile:'የእኔ መገለጫ', edit_profile:'መገለጫ አርትዕ',
+        notifications:'ማሳወቂያዎች', sign_out:'ውጣ',
+        // Landing
+        hire_talent:'ተሰጥኦ ቅጠር →', find_job:'ስራ ፈልግ →',
+        looking_for_work:'ስራ እፈልጋለሁ', im_hiring:'ቀጣሪ ነኝ',
+        how_it_works:'SmartRecruit እንዴት ይሠራል', for_job_seekers:'ለስራ ፈላጊዎች',
+        for_employers:'ለቀጣሪዎች', latest_jobs:'የቅርብ ጊዜ ስራ ለጥፎች',
+        platform_features:'የፕላትፎርም ባህሪያት', ready_start:'ለመጀመር ዝግጁ ነህ?',
+        active_candidates:'ንቁ እጩዎች', open_positions:'ክፍት ቦታዎች',
+        companies_hiring:'የሚቀጥሩ ኩባንያዎች',
+        // Dashboard
+        recent_applications:'የቅርብ ጊዜ ማመልከቻዎች', view_all:'ሁሉንም ይመልከቱ →',
+        recommended:'ለእርስዎ የተመከሩ', see_all:'ሁሉንም ይመልከቱ →',
+        profile_strength:'የመገለጫ ጥንካሬ', complete_profile:'መገለጫ አጠናቅቅ →',
+        saved_jobs:'የተቀመጡ ስራዎች', active_jobs:'ንቁ የስራ ማስታወቂያዎች',
+        recent_applicants:'የቅርብ ጊዜ አመልካቾች', candidate_search:'🔍 እጩ ፈልግ',
+        no_applicants_yet:'እስካሁን አመልካቾች የሉም።', post_a_job:'ስራ ለጥፍ →',
+        manage_all:'ሁሉንም አቀናበር →', post_new:'+ አዲስ ለጥፍ →',
+        edit_profile_btn:'መገለጫ አርትዕ', browse_jobs_btn:'ስራዎችን ፈልግ',
+        // Messages
+        outreach_from_employers:'ከቀጣሪዎች የደረሰ መልዕክት',
+        conversations_with:'ከእጩዎች ጋር ውይይቶች',
+        back_dashboard:'← ዳሽቦርድ', reply_sent:'✓ መልስዎ ተልኳል።',
+        send:'ላክ', no_messages:'ምንም መልዕክት የለም', your_reply:'እርስዎ',
+        send_followup:'ቀጣይ መልዕክት ይላኩ…', write_reply:'መልስዎን ይፃፉ…',
+        quick_accept:'✓ ፈጣን ተቀባይነት', decline_politely:'✗ በጨዋነት አሻፈረኝ',
+        // Jobs
+        browse_jobs_title:'ስራዎችን ፈልግ', search_btn:'ፈልግ', apply_now:'አሁን አመልክት',
+        save_job:'🔖 ስራ ቀምጥ', submit_application:'ማመልከቻ ላክ',
+        posted:'ተለጥፏል', active:'ንቁ', closed:'ተዘጋ',
+        required_skills:'የሚያስፈልጉ ክህሎቶች', open_positions_label:'ክፍት ቦታዎች',
+        // Applications
+        my_applications:'የእኔ ማመልከቻዎች', browse_more:'ተጨማሪ ስራዎች ፈልግ',
+        no_applications:'እስካሁን ማመልከቻዎች የሉም', pipeline_progress:'ሂደት',
+        // Auth
+        create_account:'መለያ ፍጠር', already_have:'መለያ አለህ?',
+        sign_in_link:'ግባ', welcome_back:'እንኳን ደህና መጣህ',
+        new_here:'አዲስ ነህ?', create_account_link:'መለያ ፍጠር',
+        job_seeker:'👤 ስራ ፈላጊ', employer_btn:'🏢 ቀጣሪ',
+        // Profile
+        about:'ስለ', technical_skills:'ቴክኒካዊ ክህሎቶች', soft_skills:'ለስላሳ ክህሎቶች',
+        education:'ትምህርት', certifications:'የምስክር ወረቀቶች', reviews:'ግምገማዎች',
+        open_to_work:'ለስራ ክፍት', not_looking:'አልፈልግም',
+        contact_candidate:'📬 መልዕክት ላክ', message_sent:'✓ ተልኳል', rate:'⭐ ግምት',
+        about_company:'ስለ ኩባንያ', work_environment:'የሥራ አካባቢ',
+        benefits_perks:'ጥቅሞች', no_reviews:'እስካሁን ምንም ግምገማ የለም።',
+        download_cv:'📄 CV አውርድ', view_profile:'መገለጫ ይመልከቱ',
+        view_public_profile:'ህዝባዊ መገለጫ ይመልከቱ',
+        // Notifications
+        all_caught_up:'ሁሉም ተነቦዋል', no_notif_yet:'ምንም ማሳወቂያ የለም።',
+        mark_all_read:'ሁሉንም እንደተነበበ ምልክት አድርግ',
+        // Ratings
+        leave_rating:'ግምት ይስጡ', your_score:'ነጥብዎ',
+        submit:'አስገባ', cancel:'ሰርዝ',
+        // General
+        search:'ፈልግ', filter:'አጣራ', close:'ዝጋ', save:'ቀምጥ',
+        yes:'አዎ', no:'አይ', loading:'በመጫን ላይ…', error:'ስህተት',
+        next:'ቀጣይ →', prev:'← ቀዳሚ',
+        // Landing page keys
+        smart_matching:'ብልህ የእጩ ግጥሚያ',
+        hero_line1:'መፈለግ አቁም።', hero_line2_prefix:'', hero_line2_word:'መተሳሰር ጀምር።',
+        hero_desc:'SmartRecruit ተወዳዳሪዎችን እና ቀጣሪዎችን በሙያ እና ልምድ ያዛምዳል — ቁልፍ ቃላትን ሳይሆን። የሚፈልጉትን ይግለጹ፣ ሞተራችን ያሟሟቻቸዋል።',
+        hire_talent:'ተሰጥኦ ቅጠር →', find_job:'ስራ ፈልግ →',
+        social_proof:'ላይ ምዝገባ ያደረጉ',
+        smart_search_label:'🔍 ፈጣን ፍለጋ', indexed_candidates:'የተመዘገቡ እጩዎች',
+        open_positions:'ክፍት ቦታዎች', actively_hiring:'በንቃት ቀጣሪ',
+        latest_match_label:'የቅርብ ጊዜ ግጥሚያ', match_score_label:'የግጥሚያ ነጥብ',
+        new_outreach_notif:'🔔 አዲስ መልዕክት', techcorp_messaged:'TechCorp መልዕክት ላከ',
+        active_candidates:'👤 ንቁ እጩዎች', open_positions_stat:'💼 ክፍት ቦታዎች',
+        companies_hiring:'🏢 የሚቀጥሩ ኩባንያዎች',
+        simple_process:'ቀላል ሂደት',
+        step1_title:'መገለጫ ፍጠር', step1_desc:'እጩዎች ክህሎቶች፣ CV እና ልምድ ይጨምራሉ። ቀጣሪዎች የኩባንያ መረጃ እና ባህል ያቋቁማሉ።',
+        step2_title:'ብልህ ግጥሚያ', step2_desc:'ሞተራችን መገለጫዎችን ይተነትናል እና ለእያንዳንዱ ፍለጋ ተስማሚዎቹን ይደረድራል።',
+        step3_title:'ያገናኙ እና ቅጠሩ', step3_desc:'ቀጣሪዎች ይፈልጋሉ፣ ስራ ይለጥፋሉ፣ መልዕክት ይልካሉ። እጩዎች ያመለክታሉ እና ሂደት ይከታተላሉ።',
+        for_job_seekers:'ለስራ ፈላጊዎች', find_next_opp:'ቀጣዩ እድልዎን ይፈልጉ',
+        cand_li1:'ሙሉ መገለጫ ከCV፣ ክህሎቶች እና ፖርትፎሊዮ ጋር ይፍጠሩ',
+        cand_li2:'ለብቃትዎ የሚስማሙ የስራ ምክሮች ያግኙ',
+        cand_li3:'በአንድ ጠቅ ያመልክቱ እና ሂደትዎን ይከታተሉ',
+        cand_li4:'ከምርጥ ቀጣሪዎች ቀጥተኛ መልዕክቶችን ይቀበሉ',
+        cand_li5:'ከቅጥር ልምድዎ በኋላ ኩባንያዎቹን ይገምግሙ',
+        create_candidate_account:'የእጩ መለያ ፍጠር',
+        for_employers:'ለቀጣሪዎች', build_dream_team:'ህልምዎን ቡድን ይገንቡ',
+        emp_li1:'የኩባንያ ባህል እና ጥቅሞች ያቅርቡ',
+        emp_li2:'ደሞዝ፣ ክህሎቶች እና የስራ ዘዴ ያለው ስራ ያስታውቁ',
+        emp_li3:'እጩዎችን በሙያ ቀላል ቋንቋ ይፈልጉ',
+        emp_li4:'ለዘለፈ ቀጥተኛ መልዕክቶችን ይላኩ',
+        emp_li5:'አመልካቾችን በእይታ ቻናል ያቀናብሩ',
+        emp_li6:'ከእጩ ደረጃዎች ጋር የቀጣሪ ዝና ይገንቡ',
+        start_hiring_today:'ዛሬ ቅጠር ይጀምሩ',
+        live_openings:'ቀጥታ ክፍቶች', latest_jobs:'የቅርብ ጊዜ ስራ ለጥፎች',
+        everything_you_need:'የሚያስፈልግዎ ሁሉ',
+        feat1_title:'ፈጣን ፍለጋ', feat1_desc:'እንግሊዘኛ ቋንቋ ይጠቀሙ — boolean ፍልተሮች አያስፈልጉም',
+        feat2_title:'ሁለት-አቅጣጫ ደረጃዎች', feat2_desc:'እጩዎች ቀጣሪዎችን ይደርዛሉ፣ ቀጣሪዎች እጩዎችን ይደርዛሉ። ግልጽነት።',
+        feat3_title:'ቀጥተኛ መልዕክት', feat3_desc:'ቀጣሪዎች ምርጥ እጩዎችን ሳያመለክቱ ያነጋግሯቸዋል።',
+        feat4_title:'የቅጥር ሂደት', feat4_desc:'ቀርቧል → ምርጫ → ቃለ-ምልልስ → ፈተና → ቅናሽ → ተቀጠሩ',
+        feat5_title:'ፈጣን ማሳወቂያዎች', feat5_desc:'ስለ መልዕክቶች፣ ግጥሚያዎች እና ሁኔታ ለውጦች ወዲያው ይነገሩ።',
+        feat6_title:'CV ማስቀመጫ', feat6_desc:'CVዎች ደህና ተቀምጠዋል — ውጫዊ አገልጋዮች አያስፈልጉም።',
+        feat7_title:'ማህበራዊ መገለጫዎች', feat7_desc:'ሙሉ የህዝብ መገለጫዎች ለሁለቱም ወገኖች — እንደ LinkedIn።',
+        feat8_title:'የግላዊነት ቁጥጥር', feat8_desc:'የፍለጋ ታይነት እና ለስራ ክፍት ሁኔታ ማንኛውም ጊዜ ይቀይሩ።',
+        cta_headline:'ቀጣዩ ቅጥርዎ — ወይም ሚናዎ — እዚህ አለ።',
+        cta_sub:'SmartRecruit ይቀላቀሉ እና ትክክለኛ የቅጥር ልምድ ያጋጥሙ።',
+        // Extra keys for new TEXT_MAP_EN entries
+        for_candidates_footer:'ለእጩዎች', for_employers_footer:'ለቀጣሪዎች',
+        no_notif_yet:'ምንም ማሳወቂያ የለም።', status_label:'ሁኔታ',
+        edit_profile_btn:'መገለጫ አርትዕ', browse_jobs_btn:'ስራዎችን ፈልግ',
+        no_active_jobs:'ምንም ንቁ ስራ የለም። የመጀመሪያ ስራ ለጥፍ።',
+        post_a_job:'ስራ ለጥፍ →', no_applicants_yet:'አመልካቾች የሉም።',
+        unread_alerts:'ያልተነበቡ ማሳወቂያዎች', total_applicants:'ጠቅላላ አመልካቾች',
+        active_jobs_label:'ንቁ ስራዎች', view_btn:'ይመልከቱ', close_btn:'ዝጋ',
+        make_offer:'✓ ስምምነት ላክ', reject_btn:'አሻፈረኝ', message_btn:'መልዕክት',
+        view_profile:'መገለጫ ይመልከቱ', download_cv_btn:'CV አውርድ',
+        update_btn:'አዘምን', save_btn:'ቀምጥ', add_note:'ማስታወሻ ጨምር',
+        all_jobs:'ሁሉም ስራዎች', update_pipeline:'ሂደት ደረጃ / ማስታወሻ ዘምን',
+        search_btn:'ፈልግ', clear_btn:'አጽዳ', no_jobs:'ምንም ስራ አልተገኘም',
+        try_different:'ሌላ ቃል ሞክር።', clear_search:'ፍለጋ አጽዳ →',
+        prev_plain:'ቀዳሚ', next_plain:'ቀጣይ',
+        active_status:'ንቁ', closed_status:'ተዘጋ', posted_label:'ተለጥፏል',
+        required_skills:'የሚያስፈልጉ ክህሎቶች', open_positions_label:'ክፍት ቦታዎች',
+        sign_in_apply:'ለማመልከት ግባ', apply_now:'አሁን አመልክት',
+        save_job:'🔖 ቀምጥ', bookmarked_remove:'🔖 ቀርፏል (አስወግድ)',
+        submit_application:'ማመልከቻ ላክ', cancel:'ሰርዝ',
+        already_applied:'አስቀድሞ ተልኳል', position_closed:'ቦታው ተዘጋ።',
+        no_location:'ቦታ አልተጠቀሰም', no_location_set:'ቦታ አልተቀናበረም',
+        no_skills:'ምንም ክህሎት የለም', any_location:'ማንኛውም ቦታ',
+        first_to_rate:'የመጀመሪያ ሆነህ ግምት ስጥ →',
+        open_positions_section:'ክፍት ቦታዎች', review_optional:'ግምገማ (አማራጭ)',
+        withdraw_btn:'አወጣ', employer_note:'ቀጣሪ ማስታወሻ',
+        reply_empty:'መልስ ባዶ ሊሆን አይችልም።',
+        quick_accept:'✓ ፈጣን ተቀባይነት', decline_politely:'✗ በጨዋነት አሻፈረኝ',
+        manage_application:'ማመልከቻ አቀናብር', no_messages_sent:'ምንም መልዕክት አልተላከም',
+        go_dashboard:'ወደ ዳሽቦርድ →',
+        post_new_job:'አዲስ ስራ ለጥፍ', salary_range:'የደሞዝ ወሰን',
+        job_type_label:'የስራ አይነት', work_mode_label:'የስራ ዘዴ',
+        publish_job:'ስራ አሳትም', any_option:'ማንኛውም', min_exp:'ዝቅተኛ ልምድ (ዓመታት)',
+        edit_your_profile:'መገለጫ አርትዕ', view_public_profile:'ህዝባዊ መገለጫ ይመልከቱ',
+        personal_info:'የግል መረጃ', change_photo:'ፎቶ ቀይር',
+        professional_info:'ሙያዊ መረጃ', job_title_field:'የስራ ማዕረግ',
+        life_skills_label:'ለስላሳ ክህሎቶች', exp_years:'የልምድ ዓመታት',
+        expected_salary:'የሚጠበቅ ደሞዝ', pref_job_type:'የሚወደደው የስራ አይነት',
+        cv_resume:'CV እና ምልክት', upload_cv:'CV ጫን', download_label:'አውርድ',
+        resume_text_label:'ምልክት ጽሑፍ', visibility:'የታይነት ቅንብሮች',
+        show_in_search:'በፍለጋ ውጤቶች ውስጥ አሳይ',
+        open_to_work_label:'ለስራ ክፍት', save_profile:'መገለጫ ቀምጥ',
+        profile_saved:'መገለጫ በተሳካ ሁኔታ ተቀምጧል!',
+        edit_company_profile:'የኩባንያ መገለጫ አርትዕ', upload_logo:'አርማ ጫን',
+        company_size:'የኩባንያ ቁጥር', founded_year:'የተቋቋመበት ዓመት',
+        work_env_culture:'የስራ አካባቢ እና ባህል',
+        contact_person:'ተጠሪ ሰው', save_company_profile:'የኩባንያ መገለጫ ቀምጥ',
+        create_account:'መለያ ፍጠር', already_have:'መለያ አለህ?',
+        sign_in_link:'ግባ', welcome_back:'እንኳን ደህና መጣህ', new_here:'አዲስ ነህ?',
+        create_account_link:'መለያ ፍጠር',
+        your_info_section:'የእርስዎ መረጃ', company_info_section:'የኩባንያ መረጃ',
+        create_account_btn:'መለያ ፍጠር →', sign_in_btn:'ግባ →',
+        password_label:'የይለፍ ቃል', email_label:'ኢሜይል አድራሻ',
+        confirm_password:'የይለፍ ቃል ያረጋግጡ', demo_accounts:'ናሙና መለያዎች',
+        all_link:'ሁሉም →', mark_all_read:'ሁሉንም እንደተነበበ ምልክት አድርግ',
+        all_caught_up:'ሁሉም ተነቦዋል',
+        browse_jobs_link:'ስራዎችን ፈልግ →',
+        complete_profile_msg:'ምክሮች ለማግኘት መገለጫዎን ያጠናቅቁ።',
+        bookmark_hint:'የሚወዷቸውን ስራዎች ቀምጠው ከዚህ ይመልከቱ።',
+        no_applications:'እስካሁን ማመልከቻዎች የሉም',
+        no_candidates:'ምንም እጩ አልተገኘም።',
+        candidate_search:'🔍 እጩ ፈልግ', searching:'በፍለጋ ላይ…',
+        linkedin:'LinkedIn ↗', portfolio:'Portfolio ↗',
+        first_to_rate:'የመጀመሪያ ሆነህ ግምት ስጥ →',
+        waiting_reply:'የእጩ መልስ በመጠበቅ ላይ…',
+        no_messages_page:'ምንም መልዕክት የለም',
+        reply_to_label:'ለዚህ መልዕክት ይመልሱ:',
+        send_followup_label:'ቀጣይ ይላኩ:',
+        no_applicants_page:'አሁን አመልካቾች የሉም',
+        // New keys from screenshot
+        candidate_search:'🔍 እጩ ፈልግ',
+        search_hint:'ለምሳሌ "ከደመና ልምድ ጋር ሲኒዮር ፓይቶን ምህንድስ"',
+        active_jobs_label:'ንቁ ስራዎች',
+        total_applicants:'ጠቅላላ አመልካቾች',
+        unread_alerts:'ያልተነበቡ ማሳወቂያዎች',
+        rating_label:'⭐ ደረጃ',
+        one_applicant:'1 አመልካቺ',
+        applicant_singular:'አመልካቺ',
+        applicants_plural:'አመልካቾች',
+        applied_for_prefix:'ያመለከቱት',
+        notifications_heading:'ማሳወቂያዎች',
+        all_link2:'ሁሉም →',
+        no_notif_short:'ምንም ማሳወቂያ የለም።',
+        rating_word:'ደረጃ',
+        match_word:'ተዛምዷል',
+        replied_msg:'መልዕክትዎን መለሱ',
+      }
+    };
+
+    let _currentLang = localStorage.getItem('sr-lang') || 'en';
+
+    // Text-node map — English string → i18n key
+    // Walker translates any untagged element whose trimmed text matches exactly.
+    const TEXT_MAP_EN = {
+      'Browse Jobs':'browse_jobs','Dashboard':'dashboard','Applications':'applications',
+      'Messages':'messages','Applicants':'applicants','Sign In':'sign_in',
+      'Get Started':'get_started','My Profile':'my_profile','Edit Profile':'edit_profile',
+      'Notifications':'notifications','Sign Out':'sign_out','+ Post Job':'post_job',
+      'For Candidates':'for_candidates_footer','For Employers':'for_employers_footer',
+      'Recent Applications':'recent_applications','View all →':'view_all',
+      'Recommended for You':'recommended','See all →':'see_all',
+      'Profile Strength':'profile_strength','Complete profile →':'complete_profile',
+      'Saved Jobs':'saved_jobs','Open to Work':'open_to_work','Not Looking':'not_looking',
+      'Browse jobs →':'browse_jobs_link',
+      'Complete your profile to get personalised recommendations.':'complete_profile_msg',
+      'Bookmark jobs you like to save them here.':'bookmark_hint',
+      'No notifications yet.':'no_notif_yet','Status':'status_label',
+      'Edit Profile':'edit_profile_btn','Browse Jobs':'browse_jobs_btn',
+      'Active Job Posts':'active_jobs','Recent Applicants':'recent_applicants',
+      'No active jobs. Post your first position.':'no_active_jobs',
+      'Post a job →':'post_a_job','No applicants yet.':'no_applicants_yet',
+      'Manage all →':'manage_all','+ Post new →':'post_new',
+      'Unread Alerts':'unread_alerts','Total Applicants':'total_applicants',
+      'View':'view_btn','Close':'close_btn','Make Offer \u2713':'make_offer',
+      'Reject':'reject_btn','Message':'message_btn','View Profile':'view_profile',
+      'Download CV':'download_cv_btn','Update':'update_btn','Save':'save_btn',
+      'Add a note (optional)':'add_note','All jobs':'all_jobs',
+      'Update pipeline stage / add note':'update_pipeline',
+      'Search':'search_btn','Clear':'clear_btn','No jobs found':'no_jobs',
+      'Try a different search term.':'try_different',
+      'Clear search →':'clear_search','Previous':'prev_plain','Next':'next_plain',
+      '\u2190 Previous':'prev','Next \u2192':'next',
+      'Active':'active_status','Closed':'closed_status','Posted':'posted_label',
+      'Required Skills':'required_skills','Open Positions':'open_positions_label',
+      'Sign in to Apply':'sign_in_apply','Apply Now':'apply_now',
+      '\U0001F516 Save Job':'save_job','\U0001F516 Bookmarked (remove)':'bookmarked_remove',
+      'Submit Application':'submit_application','Cancel':'cancel',
+      'Already Applied':'already_applied','This position is closed.':'position_closed',
+      'Location not specified':'no_location','Location not set':'no_location_set',
+      'No skills listed':'no_skills','Any location':'any_location',
+      'About':'about','Technical Skills':'technical_skills','Soft Skills':'soft_skills',
+      'Education':'education','Certifications':'certifications','Reviews':'reviews',
+      '\U0001F4C4 Download CV':'download_cv','LinkedIn \u2197':'linkedin','Portfolio \u2197':'portfolio',
+      '\U0001F4EC Message':'contact_candidate','\u2713 Message Sent':'message_sent',
+      '\u2B50 Rate':'rate','About the Company':'about_company',
+      'Work Environment':'work_environment','Benefits & Perks':'benefits_perks',
+      'No reviews yet.':'no_reviews','Be the first to rate \u2192':'first_to_rate',
+      'Leave a Rating':'leave_rating','Your score':'your_score',
+      'Review (optional)':'review_optional','Submit':'submit',
+      'My Applications':'my_applications','Browse more jobs':'browse_more',
+      'No applications yet':'no_applications',
+      'Withdraw':'withdraw_btn','Employer Note':'employer_note',
+      'Outreach from employers':'outreach_from_employers',
+      'Conversations with candidates':'conversations_with',
+      '\u2190 Dashboard':'back_dashboard',
+      '\u2713 Your reply was sent successfully.':'reply_sent',
+      'Reply cannot be empty.':'reply_empty','Send':'send',
+      'No messages yet':'no_messages','\u2713 Quick Accept':'quick_accept',
+      '\u2717 Decline Politely':'decline_politely',
+      'Manage Application':'manage_application',
+      'Post a New Job':'post_new_job','Salary Range':'salary_range',
+      'Job Type':'job_type_label','Work Mode':'work_mode_label',
+      'Publish Job Post':'publish_job','Any':'any_option',
+      'Minimum Experience (years)':'min_exp',
+      'Edit Your Profile':'edit_your_profile','View Public Profile':'view_public_profile',
+      'Personal Information':'personal_info','Change Photo':'change_photo',
+      'Professional Information':'professional_info','Job Title':'job_title_field',
+      'Life / Soft Skills':'life_skills_label','Years of Experience':'exp_years',
+      'Expected Salary':'expected_salary','Preferred Job Type':'pref_job_type',
+      'CV & Resume':'cv_resume','Upload CV':'upload_cv',
+      'Resume Text':'resume_text_label','Visibility Settings':'visibility',
+      'Show in search results':'show_in_search','Open to work':'open_to_work_label',
+      'Save Profile':'save_profile','Profile saved successfully!':'profile_saved',
+      'Edit Company Profile':'edit_company_profile','Upload Logo':'upload_logo',
+      'Company Size':'company_size','Founded Year':'founded_year',
+      'Work Environment & Culture':'work_env_culture',
+      'Contact Person':'contact_person','Save Company Profile':'save_company_profile',
+      'Create your account':'create_account','Already have one?':'already_have',
+      'Sign in':'sign_in_link','Welcome back':'welcome_back','New here?':'new_here',
+      'Create an account':'create_account_link',
+      '\U0001F464 Job Seeker':'job_seeker','\U0001F3E2 Employer':'employer_btn',
+      'Your Info':'your_info_section','Company Info':'company_info_section',
+      'Create Account \u2192':'create_account_btn','Sign In \u2192':'sign_in_btn',
+      'Password':'password_label','Email Address':'email_label',
+      'Confirm Password':'confirm_password','Demo accounts (seeded)':'demo_accounts',
+      'All \u2192':'all_link','Mark all read':'mark_all_read','All caught up':'all_caught_up',
+      // Strings visible in screenshot that were missed
+      '🔍 Candidate Search':'candidate_search',
+      'Candidate Search':'candidate_search',
+      'e.g. "Senior Python engineer with cloud experience"':'search_hint',
+      'Active Jobs':'active_jobs_label',
+      'Total Applicants':'total_applicants',
+      'Unread Alerts':'unread_alerts',
+      '⭐ Rating':'rating_label',
+      '1 applicant':'one_applicant',
+      'applicant':'applicant_singular',
+      'applicants':'applicants_plural',
+      'Applied for':'applied_for_prefix',
+      'View':'view_btn','Close':'close_btn',
+      'Notifications':'notifications_heading',
+      'All →':'all_link2',
+      'No notifications.':'no_notif_short',
+      'Rating':'rating_word',
+      'match':'match_word',
+      'Bob Martinez replied to your message':'replied_msg',
+    };
+
+    function applyTranslations(lang) {
+      const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+
+      // 1. data-i18n attributes (explicit tags)
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+
+      // 2. data-i18n-placeholder
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t[key] !== undefined) el.placeholder = t[key];
+      });
+
+      // 3. Text-node scanning for untagged elements
+      if (lang !== 'en') {
+        const walker = document.createTreeWalker(
+          document.body,
+          NodeFilter.SHOW_TEXT,
+          {
+            acceptNode(node) {
+              const tag = node.parentElement?.tagName?.toUpperCase();
+              if (['SCRIPT','STYLE','TEXTAREA','INPUT'].includes(tag)) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }
+        );
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        for (const node of nodes) {
+          const trimmed = node.textContent.trim();
+          const key = TEXT_MAP_EN[trimmed];
+          if (key && t[key]) node.textContent = node.textContent.replace(trimmed, t[key]);
+        }
+      }
+
+      document.getElementById('lang-label').textContent = lang === 'am' ? 'አማ' : 'EN';
+      document.documentElement.lang = lang === 'am' ? 'am' : 'en';
+    }
+
+    function setLang(lang) {
+      _currentLang = lang;
+      localStorage.setItem('sr-lang', lang);
+      applyTranslations(lang);
+      document.getElementById('lang-dropdown').classList.add('hidden');
+    }
+
+    function toggleLangMenu() {
+      document.getElementById('lang-dropdown').classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      const root = document.getElementById('lang-menu-root');
+      if (root && !root.contains(e.target))
+        document.getElementById('lang-dropdown')?.classList.add('hidden');
+    });
+
+    // Apply on load (after DOM ready)
+    if (_currentLang !== 'en') {
+      // Wait for full render then apply
+      requestAnimationFrame(() => applyTranslations(_currentLang));
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
