@@ -362,3 +362,6 @@ async def employer_outreach_view(request: Request) -> Template | Redirect:
         "user": user, "employer": emp, "threads": threads,
         "replied": request.query_params.get("replied") == "1",
     })
+
+# ── Validation helper used by post_message ───────────────────────────────────
+# (Applied inline above — body is stripped of HTML and capped at 2000 chars)

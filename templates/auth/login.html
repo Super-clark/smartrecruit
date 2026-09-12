@@ -3,45 +3,109 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md">
+
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-extrabold text-white">Welcome back</h1>
-      <p class="text-slate-400 mt-2">New here? <a href="/auth/register" class="text-brand-400 hover:underline">Create an account</a></p>
+      <h1 class="text-3xl font-extrabold mb-2" style="color:var(--text-white)" data-i18n="welcome_back">Welcome back</h1>
+      <p class="text-sm" style="color:var(--text-muted)">
+        <span data-i18n="new_here">New here?</span>
+        <a href="/auth/register" class="hover:underline ml-1" style="color:var(--teal)" data-i18n="create_account_link">Create an account</a>
+      </p>
     </div>
 
     {% if error %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{{ error }}</div>
+    <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171">
+      {{ error }}
+    </div>
     {% endif %}
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-7">
-      <form method="post" action="/auth/login" class="space-y-5">
+    <div class="rounded-2xl p-7" style="background:var(--bg-card);border:1px solid var(--border)">
+      <form method="post" action="/auth/login" class="space-y-5" novalidate>
         <input type="hidden" name="next" value="{{ next or '/dashboard' }}"/>
+
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Email Address</label>
-          <input type="email" name="email" required autofocus placeholder="you@example.com"/>
+          <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="email_label">Email Address</label>
+          <input type="email" name="email" required autofocus
+                 placeholder="you@example.com"
+                 autocomplete="email"
+                 maxlength="254"
+                 data-i18n-placeholder="email_placeholder"/>
         </div>
+
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
-          <input type="password" name="password" required placeholder="Your password"/>
+          <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="password_label">Password</label>
+          <input type="password" name="password" required
+                 placeholder="Your password"
+                 autocomplete="current-password"
+                 maxlength="128"
+                 data-i18n-placeholder="password_placeholder"/>
         </div>
-        <button type="submit" class="btn-primary w-full py-3 text-base">Sign In →</button>
+
+        <button type="submit" class="btn-primary w-full py-3 text-base" data-i18n="sign_in_btn">Sign In →</button>
       </form>
     </div>
 
-    <div class="mt-6 bg-slate-900 border border-slate-800 rounded-xl p-4">
-      <p class="text-xs text-slate-500 text-center font-semibold mb-3">Demo accounts (seeded)</p>
-      <div class="grid grid-cols-2 gap-2 text-xs text-slate-400">
-        <div class="bg-slate-800 rounded-lg p-2">
-          <p class="text-slate-300 font-medium">Candidate</p>
-          <p>alice.dev@example.com</p>
-          <p>password123</p>
+    <!-- Demo accounts -->
+    <div class="mt-5 rounded-xl p-4" style="background:var(--bg-card);border:1px solid var(--border)">
+      <p class="text-xs font-semibold text-center mb-3" style="color:var(--text-muted)" data-i18n="demo_accounts">Demo accounts</p>
+      <div class="grid grid-cols-2 gap-2 text-xs" style="color:var(--text-muted)">
+        <div class="rounded-lg p-2.5" style="background:var(--bg-input);border:1px solid var(--border)">
+          <p class="font-semibold mb-1" style="color:var(--text-soft)" data-i18n="candidate_role">Candidate</p>
+          <p class="font-mono">alice.chen@example.com</p>
+          <p class="font-mono">password123</p>
         </div>
-        <div class="bg-slate-800 rounded-lg p-2">
-          <p class="text-slate-300 font-medium">Employer</p>
-          <p>hr@techcorp.com</p>
-          <p>employer123</p>
+        <div class="rounded-lg p-2.5" style="background:var(--bg-input);border:1px solid var(--border)">
+          <p class="font-semibold mb-1" style="color:var(--text-soft)" data-i18n="employer_role">Employer</p>
+          <p class="font-mono">hr@techcorp.com</p>
+          <p class="font-mono">employer123</p>
         </div>
       </div>
+      <!-- Quick fill buttons -->
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <button type="button" onclick="fillDemo('alice.chen@example.com','password123')"
+                class="btn-secondary text-xs py-1.5" data-i18n="fill_candidate">
+          Fill Candidate
+        </button>
+        <button type="button" onclick="fillDemo('hr@techcorp.com','employer123')"
+                class="btn-secondary text-xs py-1.5" data-i18n="fill_employer">
+          Fill Employer
+        </button>
+      </div>
     </div>
+
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function fillDemo(email, password) {
+    document.querySelector('input[name="email"]').value = email;
+    document.querySelector('input[name="password"]').value = password;
+    document.querySelector('input[name="email"]').focus();
+  }
+  // Client-side validation before submit
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const password = document.querySelector('input[name="password"]').value;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(email)) {
+      e.preventDefault();
+      showFormError('Please enter a valid email address.');
+      return;
+    }
+    if (!password || password.length < 1) {
+      e.preventDefault();
+      showFormError('Please enter your password.');
+    }
+  });
+  function showFormError(msg) {
+    let el = document.getElementById('client-error');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'client-error';
+      el.style.cssText = 'background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;margin-bottom:1rem';
+      document.querySelector('form').before(el);
+    }
+    el.textContent = msg;
+  }
+</script>
 {% endblock %}

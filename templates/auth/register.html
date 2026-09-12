@@ -3,119 +3,214 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-lg">
+
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-extrabold text-white">Create your account</h1>
-      <p class="text-slate-400 mt-2">Already have one? <a href="/auth/login" class="text-brand-400 hover:underline">Sign in</a></p>
+      <h1 class="text-3xl font-extrabold mb-2" style="color:var(--text-white)" data-i18n="create_account">Create your account</h1>
+      <p class="text-sm" style="color:var(--text-muted)">
+        <span data-i18n="already_have">Already have one?</span>
+        <a href="/auth/login" class="hover:underline ml-1" style="color:var(--teal)" data-i18n="sign_in_link">Sign in</a>
+      </p>
     </div>
 
     {% if error %}
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{{ error }}</div>
+    <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171">
+      {{ error }}
+    </div>
     {% endif %}
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-7">
+    <div class="rounded-2xl p-7" style="background:var(--bg-card);border:1px solid var(--border)">
+
       <!-- Role selector -->
-      <div class="flex gap-3 mb-6" id="role-tabs">
-        <button type="button" onclick="setRole('CANDIDATE')"
-          class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
-          id="tab-candidate">
+      <div class="flex gap-3 mb-6">
+        <button type="button" onclick="setRole('CANDIDATE')" id="tab-candidate"
+          class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all" data-i18n="job_seeker">
           👤 Job Seeker
         </button>
-        <button type="button" onclick="setRole('EMPLOYER')"
-          class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
-          id="tab-employer">
+        <button type="button" onclick="setRole('EMPLOYER')" id="tab-employer"
+          class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all" data-i18n="employer_btn">
           🏢 Employer
         </button>
       </div>
 
-      <form method="post" action="/auth/register" id="reg-form">
+      <form method="post" action="/auth/register" id="reg-form" novalidate>
         <input type="hidden" name="role" id="role-input" value="{{ role or 'CANDIDATE' }}"/>
 
         <!-- Common fields -->
         <div class="space-y-4 mb-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Email Address *</label>
-            <input type="email" name="email" required placeholder="you@example.com"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="email_label">Email Address *</label>
+            <input type="email" name="email" required
+                   value="{{ prev_email or '' }}"
+                   placeholder="you@example.com"
+                   autocomplete="email" maxlength="254"
+                   id="field-email"/>
+            <p class="text-xs mt-1 hidden" id="err-email" style="color:#f87171"></p>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Password *</label>
-              <input type="password" name="password" required placeholder="Min. 8 characters"/>
+              <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="password_label">Password *</label>
+              <input type="password" name="password" required
+                     placeholder="Min. 8 characters"
+                     autocomplete="new-password" maxlength="128"
+                     id="field-password"
+                     data-i18n-placeholder="password_min_hint"/>
+              <p class="text-xs mt-1 hidden" id="err-password" style="color:#f87171"></p>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">Confirm Password *</label>
-              <input type="password" name="confirm_password" required placeholder="Repeat password"/>
+              <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="confirm_password">Confirm Password *</label>
+              <input type="password" name="confirm_password" required
+                     placeholder="Repeat password"
+                     autocomplete="new-password" maxlength="128"
+                     id="field-confirm"
+                     data-i18n-placeholder="repeat_password_hint"/>
+              <p class="text-xs mt-1 hidden" id="err-confirm" style="color:#f87171"></p>
             </div>
           </div>
         </div>
 
         <!-- CANDIDATE fields -->
         <div id="candidate-fields" class="space-y-4 mb-4">
-          <div class="border-t border-slate-800 pt-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Your Info</p>
+          <div class="pt-3" style="border-top:1px solid var(--border)">
+            <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--text-muted)" data-i18n="your_info_section">Your Info</p>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Full Name</label>
-            <input type="text" name="full_name" placeholder="Jane Doe"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="full_name_field">Full Name *</label>
+            <input type="text" name="full_name" id="field-fullname"
+                   value="{{ prev_full_name or '' }}"
+                   placeholder="Jane Doe" maxlength="255"/>
+            <p class="text-xs mt-1 hidden" id="err-fullname" style="color:#f87171"></p>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Profession / Job Title</label>
-            <input type="text" name="profession" placeholder="e.g. Senior Python Engineer"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="profession_field">Profession / Job Title</label>
+            <input type="text" name="profession"
+                   value="{{ prev_profession or '' }}"
+                   placeholder="e.g. Senior Python Engineer" maxlength="255"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Key Skills <span class="text-slate-600">(comma-separated)</span></label>
-            <input type="text" name="skills" placeholder="Python, React, SQL, Leadership…"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)">
+              <span data-i18n="tech_skills_label">Key Skills</span>
+              <span style="color:var(--text-muted);font-weight:400" data-i18n="comma_sep"> (comma-separated)</span>
+            </label>
+            <input type="text" name="skills"
+                   value="{{ prev_skills or '' }}"
+                   placeholder="Python, React, SQL, Leadership…" maxlength="500"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Years of Experience</label>
-            <input type="number" name="experience_years" min="0" max="50" value="0"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="exp_years">Years of Experience</label>
+            <input type="number" name="experience_years" min="0" max="60" value="0"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Short Bio</label>
-            <textarea name="bio" rows="2" placeholder="Tell employers a bit about yourself…"></textarea>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="short_bio">Short Bio</label>
+            <textarea name="bio" rows="2" maxlength="2000"
+                      placeholder="Tell employers a bit about yourself…"
+                      data-i18n-placeholder="bio_auth_placeholder"></textarea>
           </div>
         </div>
 
         <!-- EMPLOYER fields -->
         <div id="employer-fields" class="space-y-4 mb-4 hidden">
-          <div class="border-t border-slate-800 pt-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Company Info</p>
+          <div class="pt-3" style="border-top:1px solid var(--border)">
+            <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--text-muted)" data-i18n="company_info_section">Company Info</p>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Company Name</label>
-            <input type="text" name="company_name" placeholder="Acme Corp (or your name if solo)"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="company_name">Company Name *</label>
+            <input type="text" name="company_name" id="field-company"
+                   value="{{ prev_company_name or '' }}"
+                   placeholder="Acme Corp (or your name if solo)" maxlength="255"/>
+            <p class="text-xs mt-1 hidden" id="err-company" style="color:#f87171"></p>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Industry</label>
-            <input type="text" name="industry" placeholder="Technology, Finance, Healthcare…"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="industry_label">Industry</label>
+            <input type="text" name="industry"
+                   value="{{ prev_industry or '' }}"
+                   placeholder="Technology, Finance, Healthcare…" maxlength="255"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Location</label>
-            <input type="text" name="location" placeholder="City, Country or Remote"/>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="location_label">Location</label>
+            <input type="text" name="location"
+                   value="{{ prev_location or '' }}"
+                   placeholder="City, Country or Remote" maxlength="255"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Company Description</label>
-            <textarea name="description" rows="2" placeholder="What does your company do?"></textarea>
+            <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted)" data-i18n="company_desc_auth">Company Description</label>
+            <textarea name="description" rows="2" maxlength="2000"
+                      placeholder="What does your company do?"
+                      data-i18n-placeholder="company_desc_auth_placeholder"></textarea>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary w-full py-3 text-base mt-2">Create Account →</button>
+        <button type="submit" class="btn-primary w-full py-3 text-base mt-2" data-i18n="create_account_btn">Create Account →</button>
       </form>
     </div>
-    <p class="text-center text-xs text-slate-600 mt-4">By registering you agree to our terms and privacy policy.</p>
+
+    <p class="text-center text-xs mt-4" style="color:var(--text-muted)" data-i18n="terms_notice">By registering you agree to our terms and privacy policy.</p>
   </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
   const urlRole = new URLSearchParams(location.search).get('role') || '{{ role or "CANDIDATE" }}';
+
   function setRole(r) {
     document.getElementById('role-input').value = r;
     const isCand = r === 'CANDIDATE';
     document.getElementById('candidate-fields').classList.toggle('hidden', !isCand);
     document.getElementById('employer-fields').classList.toggle('hidden', isCand);
-    document.getElementById('tab-candidate').className = `flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${isCand ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`;
-    document.getElementById('tab-employer').className = `flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${!isCand ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`;
+    const active   = 'flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all text-white';
+    const inactive = 'flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all';
+    document.getElementById('tab-candidate').className = active;
+    document.getElementById('tab-candidate').style.background = isCand  ? 'var(--teal)'  : 'var(--bg-input)';
+    document.getElementById('tab-candidate').style.color      = isCand  ? '#fff'         : 'var(--text-muted)';
+    document.getElementById('tab-employer').className  = inactive;
+    document.getElementById('tab-employer').style.background  = !isCand ? 'var(--teal)'  : 'var(--bg-input)';
+    document.getElementById('tab-employer').style.color       = !isCand ? '#fff'         : 'var(--text-muted)';
   }
   setRole(urlRole);
+
+  // ── Client-side validation ──────────────────────────────────────────────
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (msg) { el.textContent = msg; el.classList.remove('hidden'); }
+    else { el.textContent = ''; el.classList.add('hidden'); }
+  }
+
+  document.getElementById('reg-form').addEventListener('submit', function(e) {
+    let ok = true;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const email   = document.getElementById('field-email').value.trim();
+    const pwd     = document.getElementById('field-password').value;
+    const confirm = document.getElementById('field-confirm').value;
+    const role    = document.getElementById('role-input').value;
+
+    showErr('err-email',    '');
+    showErr('err-password', '');
+    showErr('err-confirm',  '');
+    showErr('err-fullname', '');
+    showErr('err-company',  '');
+
+    if (!emailRe.test(email)) {
+      showErr('err-email', 'Please enter a valid email address.');
+      ok = false;
+    }
+    if (!pwd || pwd.length < 8) {
+      showErr('err-password', 'Password must be at least 8 characters.');
+      ok = false;
+    }
+    if (pwd !== confirm) {
+      showErr('err-confirm', 'Passwords do not match.');
+      ok = false;
+    }
+    if (role === 'CANDIDATE') {
+      const name = document.getElementById('field-fullname')?.value.trim();
+      if (!name) { showErr('err-fullname', 'Please enter your full name.'); ok = false; }
+    }
+    if (role === 'EMPLOYER') {
+      const company = document.getElementById('field-company')?.value.trim();
+      if (!company) { showErr('err-company', 'Please enter your company name.'); ok = false; }
+    }
+    if (!ok) e.preventDefault();
+  });
 </script>
 {% endblock %}
