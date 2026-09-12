@@ -5,21 +5,21 @@
 
   <!-- Header -->
   <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
-    <div class="flex items-center gap-4">
-      <div class="relative w-14 h-14 shrink-0">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0">
         <img src="/profile/avatar/{{ user.id }}"
-             class="w-14 h-14 rounded-full object-cover absolute inset-0"
+             class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover absolute inset-0"
              style="border:2px solid var(--teal)"
              onerror="this.style.display='none';document.getElementById('dash-avatar-fb').style.display='flex'"/>
         <div id="dash-avatar-fb"
-             class="w-14 h-14 rounded-full items-center justify-center text-white text-xl font-bold hidden"
+             class="w-12 h-12 sm:w-14 sm:h-14 rounded-full items-center justify-center text-white text-lg sm:text-xl font-bold hidden"
              style="background:var(--teal);border:2px solid var(--teal)">
           {{ (candidate.full_name or user.email)[0].upper() }}
         </div>
       </div>
-      <div>
-        <h1 class="text-2xl font-bold" style="color:var(--text-white)">{{ candidate.full_name or user.email }}</h1>
-        <p class="text-sm mt-0.5" style="color:var(--text-muted)">{{ candidate.profession or candidate.title or 'Complete your profile' }}</p>
+      <div class="min-w-0">
+        <h1 class="text-xl sm:text-2xl font-bold truncate" style="color:var(--text-white)">{{ candidate.full_name or user.email }}</h1>
+        <p class="text-sm mt-0.5 truncate" style="color:var(--text-muted)">{{ candidate.profession or candidate.title or 'Complete your profile' }}</p>
       </div>
     </div>
     <div class="flex gap-2 flex-wrap">
@@ -68,12 +68,12 @@
         {% if recent_apps %}
         <div class="space-y-3">
           {% for item in recent_apps %}
-          <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-input);border:1px solid var(--border)">
-            <div class="min-w-0">
+          <div class="flex items-center justify-between flex-wrap gap-2 p-3 rounded-lg" style="background:var(--bg-input);border:1px solid var(--border)">
+            <div class="min-w-0 flex-1">
               <p class="font-medium text-sm truncate" style="color:var(--text-white)">{{ item.job.title }}</p>
               <p class="text-xs" style="color:var(--text-muted)">Applied {{ item.app.applied_at.strftime('%d %b %Y') }}</p>
             </div>
-            <span class="pill ml-3 shrink-0
+            <span class="pill shrink-0
               {% if item.app.status.value == 'APPLIED' %}status-applied
               {% elif item.app.status.value == 'SCREENING' %}status-screening
               {% elif item.app.status.value == 'INTERVIEW' %}status-interview

@@ -2,8 +2,8 @@
 {% block title %}Edit Profile — SmartRecruit{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 py-8">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-white">Edit Your Profile</h1>
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+    <h1 class="text-2xl font-bold" style="color:var(--text-white)" data-i18n="edit_your_profile">Edit Your Profile</h1>
     {% if profile %}
     <a href="/profile/candidate/{{ profile.id }}" class="btn-secondary px-4 py-2 text-sm">View Public Profile</a>
     {% endif %}
@@ -21,16 +21,16 @@
     <!-- Avatar + Personal -->
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
       <h2 class="font-semibold text-white mb-4">Personal Information</h2>
-      <div class="flex items-start gap-5 mb-5">
+      <div class="flex items-start gap-5 mb-5 flex-wrap">
         <div class="shrink-0">
-          <img src="/profile/avatar/{{ user.id }}" class="w-20 h-20 rounded-full object-cover border-2 border-slate-700" id="avatar-preview"
-               onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;80&quot; height=&quot;80&quot;><circle cx=&quot;40&quot; cy=&quot;40&quot; r=&quot;40&quot; fill=&quot;%234c1d95&quot;/></svg>'"/>
-          <label class="block text-center text-xs text-brand-400 hover:underline cursor-pointer mt-2">
+          <img src="/profile/avatar/{{ user.id }}" class="w-20 h-20 rounded-full object-cover" style="border:2px solid var(--border)" id="avatar-preview"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;80&quot; height=&quot;80&quot;><circle cx=&quot;40&quot; cy=&quot;40&quot; r=&quot;40&quot; fill=&quot;%230f766e&quot;/></svg>'"/>
+          <label class="block text-center text-xs hover:underline cursor-pointer mt-2" style="color:var(--teal)">
             Change Photo
             <input type="file" name="avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)"/>
           </label>
         </div>
-        <div class="flex-1 grid grid-cols-2 gap-3">
+        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3" style="min-width:200px">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Full Name</label>
             <input type="text" name="full_name" value="{{ profile.full_name or '' }}" placeholder="Jane Doe"/>
@@ -47,7 +47,7 @@
             <label class="block text-xs font-semibold text-slate-400 mb-1">Birthday</label>
             <input type="date" name="birthday" value="{{ profile.birthday or '' }}"/>
           </div>
-          <div class="col-span-2">
+          <div class="sm:col-span-2">
             <label class="block text-xs font-semibold text-slate-400 mb-1">Location</label>
             <input type="text" name="location" value="{{ profile.location or '' }}" placeholder="City, Country"/>
           </div>
@@ -62,7 +62,7 @@
     <!-- Professional -->
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
       <h2 class="font-semibold text-white mb-4">Professional Information</h2>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Job Title</label>
           <input type="text" name="title" value="{{ profile.title or '' }}" placeholder="e.g. Senior Backend Engineer"/>

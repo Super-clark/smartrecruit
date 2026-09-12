@@ -153,6 +153,21 @@
     }
     .mobile-nav-link:hover { background: var(--bg-hover); color: var(--teal-light); }
 
+    /* Touch-friendly tap targets on mobile */
+    @media (max-width: 768px) {
+      .btn-primary, .btn-secondary, .btn-danger {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      input, textarea, select {
+        font-size: 16px; /* prevents iOS zoom on focus */
+        min-height: 44px;
+      }
+      textarea { min-height: 80px; }
+    }
+
     /* Theme toggle button */
     #theme-toggle {
       width: 2.25rem; height: 1.25rem;

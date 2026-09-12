@@ -100,7 +100,7 @@
               {% if is_mine %}You{% else %}{{ cp.full_name or 'Candidate' }}{% endif %}
               · {{ msg.created_at.strftime('%d %b, %H:%M') }}
             </p>
-            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap text-left px-4 py-2.5 rounded-xl"
+            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap break-words text-left px-4 py-2.5 rounded-xl"
                  style="{% if is_mine %}background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.25);color:var(--text-body);max-width:85%{% else %}background:var(--bg-input);border:1px solid var(--border);color:var(--text-body);max-width:85%{% endif %}">
               {{ msg.body }}
             </div>
@@ -124,7 +124,7 @@
             <p class="text-xs font-semibold mb-1" style="color:var(--teal)">
               You · {{ o.created_at.strftime('%d %b, %H:%M') }}
             </p>
-            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap text-left px-4 py-2.5 rounded-xl"
+            <div class="inline-block text-sm leading-relaxed whitespace-pre-wrap break-words text-left px-4 py-2.5 rounded-xl"
                  style="background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.25);color:var(--text-body);max-width:85%">
               {{ o.message }}
             </div>

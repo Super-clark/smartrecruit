@@ -17,7 +17,7 @@
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <div class="flex items-start justify-between gap-4 mb-4">
-          <div>
+          <div class="min-w-0">
             <h1 class="text-2xl font-bold text-white">{{ job.title }}</h1>
             {% if employer %}
             <a href="/profile/employer/{{ employer.id }}" class="text-brand-400 hover:underline text-sm mt-1 inline-block">{{ employer.company_name }}</a>
