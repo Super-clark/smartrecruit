@@ -140,6 +140,19 @@
     ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius:3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--teal-dim); }
 
+    /* Mobile nav links */
+    .mobile-nav-link {
+      display: block;
+      padding: .65rem .75rem;
+      border-radius: .5rem;
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--text-body);
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .mobile-nav-link:hover { background: var(--bg-hover); color: var(--teal-light); }
+
     /* Theme toggle button */
     #theme-toggle {
       width: 2.25rem; height: 1.25rem;
@@ -267,7 +280,7 @@
         <span class="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-semibold" style="background:var(--teal-glow);color:var(--teal-light);border:1px solid rgba(20,184,166,.3)">PRO</span>
       </a>
 
-      <!-- Center nav -->
+      <!-- Center nav — desktop only -->
       <nav class="hidden md:flex items-center gap-6" id="main-nav">
         <a href="/jobs"
            class="nav-link" id="nav-jobs"
@@ -404,9 +417,53 @@
           <a href="/auth/login" class="btn-secondary text-sm px-4 py-2">Sign In</a>
           <a href="/auth/register" class="btn-primary text-sm px-4 py-2">Get Started</a>
         {% endif %}
+
+        <!-- Hamburger — mobile only -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg transition-colors"
+                style="color:var(--text-muted)"
+                onclick="toggleMobileMenu()"
+                aria-label="Open menu">
+          <svg id="hamburger-icon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="close-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile menu drawer -->
+  <div id="mobile-menu"
+       class="hidden md:hidden fixed inset-x-0 top-16 z-40 shadow-2xl"
+       style="background:var(--bg-card);border-bottom:1px solid var(--border)">
+    <nav class="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+      <a href="/jobs" class="mobile-nav-link" data-i18n="browse_jobs">Browse Jobs</a>
+      {% if user %}
+        {% if user.role == 'CANDIDATE' %}
+          <a href="/dashboard/candidate" class="mobile-nav-link" data-i18n="dashboard">Dashboard</a>
+          <a href="/applications" class="mobile-nav-link" data-i18n="applications">Applications</a>
+          <a href="/outreach/inbox" class="mobile-nav-link" data-i18n="messages">Messages</a>
+        {% elif user.role == 'EMPLOYER' %}
+          <a href="/dashboard/employer" class="mobile-nav-link" data-i18n="dashboard">Dashboard</a>
+          <a href="/applications/employer" class="mobile-nav-link" data-i18n="applicants">Applicants</a>
+          <a href="/outreach/employer-view" class="mobile-nav-link" data-i18n="messages">Messages</a>
+          <a href="/employers/post-job" class="mobile-nav-link" style="color:var(--teal-light)" data-i18n="post_job">+ Post Job</a>
+        {% endif %}
+        <div style="border-top:1px solid var(--border);margin:.5rem 0"></div>
+        <a href="/profile" class="mobile-nav-link" data-i18n="my_profile">My Profile</a>
+        <a href="/notifications" class="mobile-nav-link" data-i18n="notifications">Notifications</a>
+        <form method="post" action="/auth/logout">
+          <button type="submit" class="mobile-nav-link w-full text-left" style="color:#f87171;background:none;border:none;cursor:pointer" data-i18n="sign_out">Sign Out</button>
+        </form>
+      {% else %}
+        <div style="border-top:1px solid var(--border);margin:.5rem 0"></div>
+        <a href="/auth/login" class="mobile-nav-link" data-i18n="sign_in">Sign In</a>
+        <a href="/auth/register" class="mobile-nav-link" style="color:var(--teal-light)" data-i18n="get_started">Get Started</a>
+      {% endif %}
+    </nav>
+  </div>
 
   <!-- MAIN -->
   <main class="flex-1">
@@ -426,7 +483,7 @@
           </div>
           <p class="text-xs" style="color:var(--text-muted)">Smart recruitment platform.<br/>Connecting talent with opportunity.</p>
         </div>
-        <div class="flex gap-8 text-sm" style="color:var(--text-muted)">
+        <div class="flex flex-wrap gap-8 text-sm" style="color:var(--text-muted)">
           <div>
             <p class="font-semibold mb-2" style="color:var(--text-soft)">Platform</p>
             <div class="space-y-1.5">
@@ -451,6 +508,34 @@
       html.setAttribute('data-theme', next);
       localStorage.setItem('sr-theme', next);
     }
+
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const ham  = document.getElementById('hamburger-icon');
+      const cls  = document.getElementById('close-icon');
+      const open = menu.classList.toggle('hidden');
+      ham.classList.toggle('hidden',  !open);
+      cls.classList.toggle('hidden',   open);
+    }
+    // Close mobile menu on outside click or nav link click
+    document.addEventListener('click', function(e) {
+      const btn  = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      if (!menu || !btn) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add('hidden');
+        document.getElementById('hamburger-icon')?.classList.remove('hidden');
+        document.getElementById('close-icon')?.classList.add('hidden');
+      }
+    });
+    document.querySelectorAll('#mobile-menu a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('mobile-menu')?.classList.add('hidden');
+        document.getElementById('hamburger-icon')?.classList.remove('hidden');
+        document.getElementById('close-icon')?.classList.add('hidden');
+      });
+    });
 
     // ── Active nav highlight ──────────────────────────────────────────────────
     (function() {
