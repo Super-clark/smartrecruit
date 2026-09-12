@@ -68,7 +68,7 @@
       </div>
 
       <!-- Floating stat cards -->
-      <div class="relative hidden lg:block" style="height:420px">
+      <div class="relative hidden lg:block overflow-hidden" style="height:420px">
         <div class="float-1 absolute top-0 right-8 w-52 rounded-2xl p-5 shadow-2xl" style="background:#0d1a1a;border:1px solid rgba(20,184,166,.3)">
           <p class="text-xs font-semibold mb-1" style="color:#2dd4bf" data-i18n="smart_search_label">🔍 Smart Search</p>
           <p class="text-2xl font-black" style="color:var(--text-white)">{{ total_candidates }}</p>
@@ -245,7 +245,7 @@
     <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:#14b8a6" data-i18n="everything_you_need">Everything you need</p>
     <h2 class="text-3xl font-extrabold" style="color:var(--text-white)" data-i18n="platform_features">Platform Features</h2>
   </div>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
     <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🔍</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat1_title">Smart Search</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat1_desc">Describe who you need in plain English — no boolean filters needed</p></div>
     <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">🏆</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat2_title">Two-Way Ratings</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat2_desc">Candidates rate employers, employers rate candidates. Trust through transparency.</p></div>
     <div class="feature-card rounded-xl p-4"><p class="text-2xl mb-2">📬</p><p class="font-semibold text-sm mb-1" style="color:var(--text-white)" data-i18n="feat3_title">Direct Outreach</p><p class="text-xs leading-relaxed" style="color:#475569" data-i18n="feat3_desc">Employers reach top candidates privately before they apply elsewhere.</p></div>
