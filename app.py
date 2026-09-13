@@ -24,8 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from config import DATABASE_URL, RELOAD, SERVER_HOST, SERVER_PORT, SESSION_COOKIE_NAME
 from controllers.auth import AuthController, dashboard_redirect
-from controllers.candidates import CandidateController, candidate_dashboard
-from controllers.employers import EmployerController, employer_dashboard
+from controllers.candidates import CandidateController, candidate_dashboardfrom controllers.employers import EmployerController, employer_dashboard
 from controllers.jobs import JobsController
 from controllers.applications import ApplicationsController
 from controllers.notifications import NotificationsController
@@ -124,8 +123,7 @@ async def favicon() -> Response:
 # ---------------------------------------------------------------------------
 
 @get("/", include_in_schema=False)
-async def landing(request: Request) -> Template:
-    from services.auth import get_current_user
+async def landing(request: Request) -> Template:    from services.auth import get_current_user
     from sqlalchemy import select
     from models import JobPost, EmployerProfile, CandidateProfile
     async with request.app.state.db_session() as db:
@@ -159,6 +157,15 @@ async def landing(request: Request) -> Template:
     })
 
 
+@get("/privacy", include_in_schema=False)
+async def privacy_page(request: Request) -> Template:
+    """Public privacy policy page."""
+    from services.auth import get_current_user
+    async with request.app.state.db_session() as db:
+        user = await get_current_user(request, db)
+    return Template("privacy.html", context={"user": user})
+
+
 # ---------------------------------------------------------------------------
 # Application factory
 # ---------------------------------------------------------------------------
@@ -170,6 +177,7 @@ def create_app() -> Litestar:
         route_handlers=[
             # Public
             landing,
+            privacy_page,
             favicon,
             dashboard_redirect,
             # Auth
