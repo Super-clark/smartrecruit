@@ -38,7 +38,7 @@ SESSION_COOKIE_NAME: str   = "sr_session"
 SESSION_EXPIRE_DAYS: int   = int(os.getenv("SESSION_EXPIRE_DAYS", "30"))
 
 # ---------------------------------------------------------------------------
-# File uploads (stored in DB; this controls max sizes in bytes)
+# File uploads
 # ---------------------------------------------------------------------------
 MAX_AVATAR_BYTES: int = 2 * 1024 * 1024    # 2 MB
 MAX_CV_BYTES: int     = 10 * 1024 * 1024   # 10 MB
@@ -47,6 +47,30 @@ MAX_CV_BYTES: int     = 10 * 1024 * 1024   # 10 MB
 # Pagination
 # ---------------------------------------------------------------------------
 DEFAULT_PAGE_SIZE: int = 12
+
+# ---------------------------------------------------------------------------
+# Google OAuth
+# ---------------------------------------------------------------------------
+GOOGLE_CLIENT_ID: str     = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI: str  = os.getenv(
+    "GOOGLE_REDIRECT_URI",
+    "http://127.0.0.1:8000/auth/google/callback",
+)
+
+# ---------------------------------------------------------------------------
+# Email (Gmail SMTP — for password reset)
+# ---------------------------------------------------------------------------
+SMTP_EMAIL: str    = os.getenv("SMTP_EMAIL", "")
+SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+SMTP_HOST: str     = "smtp.gmail.com"
+SMTP_PORT: int     = 587
+
+# Base URL used in reset email links
+APP_BASE_URL: str = os.getenv("APP_BASE_URL", "http://127.0.0.1:8000")
+
+# Reset token expiry in hours
+RESET_TOKEN_EXPIRE_HOURS: int = 1
 
 # ---------------------------------------------------------------------------
 # Server

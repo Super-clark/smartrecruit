@@ -77,10 +77,19 @@ class User(Base):
 
     id            : Mapped[int]      = mapped_column(Integer, primary_key=True, autoincrement=True)
     email         : Mapped[str]      = mapped_column(String(255), unique=True, nullable=False, index=True)
-    password_hash : Mapped[str]      = mapped_column(String(255), nullable=False)
+    password_hash : Mapped[str]      = mapped_column(String(255), nullable=False, default="")
     role          : Mapped[UserRole] = mapped_column(Enum(UserRole, name="userrole"), nullable=False)
     is_active     : Mapped[bool]     = mapped_column(Boolean, default=True)
     created_at    : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # OAuth / auth provider
+    auth_provider : Mapped[str]      = mapped_column(String(20), default="email", nullable=False)
+    # "email" = registered with email+password, "google" = Google OAuth
+    google_id     : Mapped[str | None] = mapped_column(String(128), unique=True, index=True)
+
+    # Password reset (email accounts only)
+    reset_token        : Mapped[str | None] = mapped_column(String(128), unique=True, index=True)
+    reset_token_expiry : Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     candidate_profile : Mapped["CandidateProfile | None"] = relationship("CandidateProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     employer_profile  : Mapped["EmployerProfile | None"]  = relationship("EmployerProfile",  back_populates="user", uselist=False, cascade="all, delete-orphan")
