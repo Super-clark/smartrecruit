@@ -124,7 +124,8 @@ async def favicon() -> Response:
 # ---------------------------------------------------------------------------
 
 @get("/", include_in_schema=False)
-async def landing(request: Request) -> Template:    from services.auth import get_current_user
+async def landing(request: Request) -> Template:
+    from services.auth import get_current_user
     from sqlalchemy import select
     from models import JobPost, EmployerProfile, CandidateProfile
     async with request.app.state.db_session() as db:
